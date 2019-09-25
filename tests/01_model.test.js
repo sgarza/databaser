@@ -1,7 +1,6 @@
 'use strict';
 
-const datatypes = require( '../datatypes' );
-const model = require( '../model.js' );
+const { datatypes, model } = require( '../index.js' );
 
 describe( 'model', () => {
     it( 'should be a function', () => {

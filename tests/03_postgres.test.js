@@ -1,7 +1,12 @@
 const child_process = require( 'child_process' );
-const datatypes = require( '../datatypes' );
-const model = require( '../model.js' );
-const postgres = require( '../databases/postgres.js' );
+const { datatypes, model, databases } = require( '../index.js' );
+
+const db = {
+    host: '127.0.0.1',
+    port: '6432',
+    user: 'postgres',
+    password: 'postgres'
+};
 
 describe( 'postgres', () => {
 
@@ -15,16 +20,16 @@ describe( 'postgres', () => {
             // do nothing, it's ok if this failed since the container may not be orphaned to clean up
         }
 
-        child_process.execSync( 'docker \
+        child_process.execSync( `docker \
             run -d \
-            -p 127.0.0.1:6432:5432/tcp \
-            -e POSTGRES_PASSWORD=postgres \
-            --health-cmd="pg_isready -U postgres" \
+            -p ${ db.host }:${ db.port }:5432/tcp \
+            -e POSTGRES_PASSWORD=${ db.password } \
+            --health-cmd="pg_isready -U ${ db.user }" \
             --health-interval="10s" \
             --health-timeout="5s" \
             --health-start-period="10s" \
             --name databaser-test-postgres \
-            postgres:latest' );
+            postgres:latest` );
 
         let postgres_ready = false;
         do {
@@ -55,13 +60,8 @@ describe( 'postgres', () => {
             email: 'foo@bar.com'
         } );
 
-        const users = await postgres.get( User, {
-            db: {
-                host: '127.0.0.1',
-                port: '6432',
-                user: 'postgres',
-                password: 'postgres'
-            }
+        const users = await databases.postgres.get( User, {
+            db
         } );
 
         await users.put( user );
@@ -92,13 +92,8 @@ describe( 'postgres', () => {
             email: 'find@domain.com'
         } );
 
-        const users = await postgres.get( User, {
-            db: {
-                host: '127.0.0.1',
-                port: '6432',
-                user: 'postgres',
-                password: 'postgres'
-            }
+        const users = await databases.postgres.get( User, {
+            db
         } );
 
         await users.put( user );
@@ -133,13 +128,8 @@ describe( 'postgres', () => {
             email: 'deletable@domain.com'
         } );
 
-        const users = await postgres.get( User, {
-            db: {
-                host: '127.0.0.1',
-                port: '6432',
-                user: 'postgres',
-                password: 'postgres'
-            }
+        const users = await databases.postgres.get( User, {
+            db
         } );
 
         await users.put( user );

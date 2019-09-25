@@ -1,6 +1,6 @@
 'use strict';
 
-const datatypes = require( '../datatypes' );
+const { datatypes } = require( '../index.js' );
 
 describe( 'datatypes', () => {
     it( 'email', () => {
