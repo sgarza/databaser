@@ -1,6 +1,5 @@
 'use strict';
 
-const delver = require( 'delver' );
 const extend = require( 'extend' );
 const traverse = require( 'traverse' );
 
@@ -42,14 +41,15 @@ module.exports = _options => {
 
         validate: object => {
             const errors = [];
+
+            const object_traverser = traverse( object );
+
             traverse( options.schema ).forEach( function( value ) {
                 if ( typeof value === 'object' && !!value && value.datatype ) {
-                    const key = this.path.join( '.' );
-                    const input_value = delver.get( object, key );
+                    const input_value = object_traverser.get( this.path );
                     const error = value.validate( input_value );
                     if ( error ) {
                         errors.push( {
-                            key,
                             error
                         } );
                     }

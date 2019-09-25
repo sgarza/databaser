@@ -157,5 +157,3 @@ describe( 'postgres', () => {
         await users.close();
     } );
 } );
-
-// console.dir( await users.del( 'foo' ) );

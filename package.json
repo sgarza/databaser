@@ -14,7 +14,6 @@
     "jest-circus": "^24.9.0"
   },
   "dependencies": {
-    "delver": "^1.1.5",
     "extend": "^3.0.2",
     "pg": "^7.12.1",
     "pluralize": "^8.0.0",
