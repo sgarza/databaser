@@ -61,7 +61,8 @@ describe( 'postgres', () => {
         } );
 
         const users = await databases.postgres.get( User, {
-            db
+            db,
+            table: 'users_store'
         } );
 
         await users.put( user );
@@ -93,7 +94,8 @@ describe( 'postgres', () => {
         } );
 
         const users = await databases.postgres.get( User, {
-            db
+            db,
+            table: 'users_find'
         } );
 
         await users.put( user );
@@ -129,7 +131,8 @@ describe( 'postgres', () => {
         } );
 
         const users = await databases.postgres.get( User, {
-            db
+            db,
+            table: 'users_delete'
         } );
 
         await users.put( user );
@@ -145,5 +148,69 @@ describe( 'postgres', () => {
         expect( deleted_user ).toEqual( undefined );
 
         await users.close();
+    } );
+
+    it( 'should serialize/deserialize an ISODate properly', async () => {
+        const User = model( {
+            name: 'user',
+            schema: {
+                id: datatypes.UUID( {
+                    null: false,
+                    unique: true,
+                    primary: true
+                } ),
+                created_at: datatypes.ISODate()
+            }
+        } );
+
+        const user = User.create();
+
+        const users = await databases.postgres.get( User, {
+            db,
+            table: 'users_isodate_serialization'
+        } );
+
+        await users.put( user );
+
+        const stored_user = await users.get( user.id );
+
+        expect( stored_user ).toEqual( user );
+
+        await users.close();
+    } );
+
+    it( 'should serialize/deserialize an ISODate in UTC properly', async () => {
+
+        const PREV_TZ = process.env.TZ;
+        process.env.TZ = 'utc';
+
+        const User = model( {
+            name: 'user',
+            schema: {
+                id: datatypes.UUID( {
+                    null: false,
+                    unique: true,
+                    primary: true
+                } ),
+                created_at: datatypes.ISODate()
+            }
+        } );
+
+        const user = User.create();
+
+        const users = await databases.postgres.get( User, {
+            db,
+            table: 'users_isodate_utc_serialization'
+        } );
+
+        await users.put( user );
+
+        const stored_user = await users.get( user.id );
+
+        expect( stored_user ).toEqual( user );
+
+        await users.close();
+
+        process.env.TZ = PREV_TZ;
     } );
 } );

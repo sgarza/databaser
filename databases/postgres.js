@@ -1,5 +1,6 @@
 'use strict';
 
+const dates = require( 'date-fns' );
 const extend = require( 'extend' );
 const pg = require( 'pg' );
 const pluralize = require( 'pluralize' );
@@ -23,6 +24,18 @@ const DATATYPE_MAP = {
     },
     UUID: () => {
         return 'UUID';
+    }
+};
+
+const DATATYPE_SERIALIZERS = {
+    ISODate: value => {
+        return value ? dates.format( new Date( value ), 'yyyy-MM-dd HH:mm:ss.SSSSSX' ) : value;
+    }
+};
+
+const DATATYPE_DESERIALIZERS = {
+    ISODate: value => {
+        return value ? new Date( value ).toISOString() : value;
     }
 };
 
@@ -180,7 +193,8 @@ module.exports = {
                     if ( typeof field === 'object' && !!field && field.datatype ) {
                         const key = options.column_name( this.path );
                         const value = object_traverser.get( this.path );
-                        const serialized_value = options.serializers[ key ] ? options.serializers[ key ]( value ) : field.serialize ? field.serialize( value ) : value;
+                        const serializer = options.serializers[ key ] || field.serialize || DATATYPE_SERIALIZERS[ field.datatype ];
+                        const serialized_value = serializer ? serializer( value ) : value;
                         serialized_traverser.set( [ key ], serialized_value );
                         return;
                     }
@@ -204,7 +218,8 @@ module.exports = {
                     if ( typeof field === 'object' && !!field && field.datatype ) {
                         const key = options.column_name( this.path );
                         const value = object_traverser.get( [ key ] );
-                        const deserialized_value = options.deserializers[ key ] ? options.deserializers[ key ]( value ) : field.deserialize ? field.deserialize( value ) : value;
+                        const deserializer = options.deserializers[ key ] || field.deserialize || DATATYPE_DESERIALIZERS[ field.datatype ];
+                        const deserialized_value = deserializer ? deserializer( value ) : value;
                         deserialized_traverser.set( this.path, deserialized_value );
                         return;
                     }
@@ -250,13 +265,15 @@ module.exports = {
                     ON CONFLICT(${ options.primary_key })
                         DO UPDATE SET
                             ${ sorted_fields.map( ( field, index ) => field === options.primary_key ? '' : `${ field } = $${ index + 1 }` ).filter( statement => statement.length ).join( ', ' ) }`;
+                const values = sorted_fields.map( field => serialized[ field ] );
 
                 if ( options.debug ) {
                     console.log( query );
+                    console.log( values );
                 }
 
                 const pool = await this._pool.get();
-                const result = await pool.query( query, sorted_fields.map( field => serialized[ field ] ) );
+                const result = await pool.query( query, values );
                 const inserted = result.rows.shift();
                 return inserted;
             },
@@ -320,6 +337,7 @@ module.exports = {
 
                 if ( options.debug ) {
                     console.log( query );
+                    console.log( values );
                 }
 
                 const pool = await this._pool.get();
