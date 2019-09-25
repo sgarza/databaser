@@ -193,7 +193,7 @@ module.exports = {
                     if ( typeof field === 'object' && !!field && field.datatype ) {
                         const key = options.column_name( this.path );
                         const value = object_traverser.get( this.path );
-                        const serializer = options.serializers[ key ] || field.serialize || DATATYPE_SERIALIZERS[ field.datatype ];
+                        const serializer = options.serializers[ key ] || DATATYPE_SERIALIZERS[ field.datatype ];
                         const serialized_value = serializer ? serializer( value ) : value;
                         serialized_traverser.set( [ key ], serialized_value );
                         return;
@@ -218,7 +218,7 @@ module.exports = {
                     if ( typeof field === 'object' && !!field && field.datatype ) {
                         const key = options.column_name( this.path );
                         const value = object_traverser.get( [ key ] );
-                        const deserializer = options.deserializers[ key ] || field.deserialize || DATATYPE_DESERIALIZERS[ field.datatype ];
+                        const deserializer = options.deserializers[ key ] || DATATYPE_DESERIALIZERS[ field.datatype ];
                         const deserialized_value = deserializer ? deserializer( value ) : value;
                         deserialized_traverser.set( this.path, deserialized_value );
                         return;
@@ -310,7 +310,8 @@ module.exports = {
                             clauses.push( `${ column_name } = $${ values.length + 1 }` );
 
                             const value = criteria_traverser.get( this.path );
-                            const serialized_value = options.serializers[ column_name ] ? options.serializers[ column_name ]( value ) : field.serialize ? field.serialize( value ) : value;
+                            const serializer = options.serializers[ column_name ] || DATATYPE_SERIALIZERS[ field.datatype ];
+                            const serialized_value = serializer ? serializer( value ) : value;
                             values.push( serialized_value );
                         }
                         return;
