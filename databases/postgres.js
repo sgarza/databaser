@@ -13,7 +13,7 @@ const DATATYPE_MAP = {
     ISODate: () => {
         return 'TIMESTAMPTZ';
     },
-    json: () => {
+    JSON: () => {
         return 'JSONB';
     },
     phone: field => {
