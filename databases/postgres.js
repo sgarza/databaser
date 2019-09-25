@@ -30,6 +30,9 @@ const DATATYPE_MAP = {
 const DATATYPE_SERIALIZERS = {
     ISODate: value => {
         return value ? dates.format( new Date( value ), 'yyyy-MM-dd HH:mm:ss.SSSSSX' ) : value;
+    },
+    JSON: value => {
+        return value ? JSON.stringify( value ) : value;
     }
 };
 
@@ -37,6 +40,7 @@ const DATATYPE_DESERIALIZERS = {
     ISODate: value => {
         return value ? new Date( value ).toISOString() : value;
     }
+    // no need for JSON deserializer, postgres automatically deserializes
 };
 
 const PG_POOL = {
