@@ -88,7 +88,7 @@ const PG_POOL = {
 };
 
 module.exports = {
-    get: async ( model, _options ) => {
+    get: ( model, _options ) => {
         const options = extend( true, {
             debug: false,
             table: pluralize( model.options.name ),
@@ -357,7 +357,6 @@ module.exports = {
             }
         };
 
-        await db._init();
         return db;
     }
 };
