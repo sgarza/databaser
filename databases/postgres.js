@@ -10,6 +10,33 @@ const DATATYPE_MAP = {
     email: field => {
         return field.options.length.max ? `VARCHAR(${ field.options.length.max })` : 'TEXT';
     },
+    integer: field => {
+        const RANGES = {
+            'smallint': [ -32768, 32767 ],
+            'integer': [ -2147483648, 2147483647 ],
+            'bigint': [ -9223372036854775808, 9223372036854775807 ]
+        };
+
+        let storage_type = 'integer';
+
+        if ( typeof field.options.range.min === 'number' || typeof field.options.range.max === 'number' ) {
+            for ( const type of Object.keys( RANGES ) ) {
+                const range = RANGES[ type ];
+                if ( typeof field.options.range.min === 'number' && field.options.range.min < range[ 0 ] ) {
+                    continue;
+                }
+                else if ( typeof field.options.range.max === 'number' && field.options.range.max > range[ 1 ] ) {
+                    continue;
+                }
+                else {
+                    storage_type = type;
+                    break;
+                }
+            }
+        }
+
+        return storage_type;
+    },
     ISODate: () => {
         return 'TIMESTAMPTZ';
     },
@@ -123,30 +150,7 @@ module.exports = {
         const db = {
             options,
             _pool: options.pool || PG_POOL.create( options ),
-            _init: async function() {
-                if ( this._initialized ) {
-                    return;
-                }
-
-                if ( this._initializing ) {
-                    return new Promise( ( resolve, reject ) => {
-                        let retry_count = 0;
-                        const check = () => {
-                            if ( this._initialized ) {
-                                resolve( this );
-                            }
-                            else {
-                                retry_count++ < 100 ? setTimeout( check, 100 ) : reject( new Error( {
-                                    error: `timed out initializing postgres db driver for model: ${ model.name }`
-                                } ) );
-                            }
-                        };
-                        check();
-                    } );
-                }
-
-                this._initializing = true;
-
+            _create_table_sql: function() {
                 const columns = {};
                 traverse( model.options.schema ).forEach( function( field ) {
                     if ( typeof field === 'object' && !!field && field.datatype ) {
@@ -174,7 +178,33 @@ module.exports = {
                     return `${ key } ${ column.type }${ modifiers.length ? ` ${ modifiers.join( ' ' ) }` : '' }`;
                 } );
 
-                const query = `CREATE TABLE IF NOT EXISTS ${ options.table } (${ clauses.join( ', ' ) });`;
+                return `CREATE TABLE IF NOT EXISTS ${ options.table } (${ clauses.join( ', ' ) });`;
+            },
+            _init: async function() {
+                if ( this._initialized ) {
+                    return;
+                }
+
+                if ( this._initializing ) {
+                    return new Promise( ( resolve, reject ) => {
+                        let retry_count = 0;
+                        const check = () => {
+                            if ( this._initialized ) {
+                                resolve( this );
+                            }
+                            else {
+                                retry_count++ < 100 ? setTimeout( check, 100 ) : reject( new Error( {
+                                    error: `timed out initializing postgres db driver for model: ${ model.name }`
+                                } ) );
+                            }
+                        };
+                        check();
+                    } );
+                }
+
+                this._initializing = true;
+
+                const query = this._create_table_sql();
 
                 if ( options.debug ) {
                     console.log( query );

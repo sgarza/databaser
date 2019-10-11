@@ -213,4 +213,101 @@ describe( 'postgres', () => {
 
         process.env.TZ = PREV_TZ;
     } );
+
+    it( 'should determine integer types properly', async () => {
+        const Smallint = model( {
+            name: 'smallint_test',
+            schema: {
+                id: datatypes.UUID( {
+                    null: false,
+                    unique: true,
+                    primary: true
+                } ),
+                val: datatypes.integer( {
+                    range: {
+                        min: -1000,
+                        max: 1000
+                    }
+                } )
+            }
+        } );
+
+        const smallints = await databases.postgres.get( Smallint, {
+            db,
+            table: 'smallint_test_store'
+        } );
+
+        const smallint_table_create_sql = smallints._create_table_sql();
+        expect( smallint_table_create_sql ).toMatch( 'val smallint' );
+
+        const Integer = model( {
+            name: 'integer_test',
+            schema: {
+                id: datatypes.UUID( {
+                    null: false,
+                    unique: true,
+                    primary: true
+                } ),
+                val: datatypes.integer( {
+                    range: {
+                        min: -100000,
+                        max: 100000
+                    }
+                } )
+            }
+        } );
+
+        const integers = await databases.postgres.get( Integer, {
+            db,
+            table: 'integer_test_store'
+        } );
+
+        const integer_table_create_sql = integers._create_table_sql();
+        expect( integer_table_create_sql ).toMatch( 'val integer' );
+
+        const Bigint = model( {
+            name: 'bigint_test',
+            schema: {
+                id: datatypes.UUID( {
+                    null: false,
+                    unique: true,
+                    primary: true
+                } ),
+                val: datatypes.integer( {
+                    range: {
+                        min: -10000000000,
+                        max: 10000000000
+                    }
+                } )
+            }
+        } );
+
+        const bigints = await databases.postgres.get( Bigint, {
+            db,
+            table: 'bigint_test_store'
+        } );
+
+        const bigint_table_create_sql = bigints._create_table_sql();
+        expect( bigint_table_create_sql ).toMatch( 'val bigint' );
+
+        const Unspecified = model( {
+            name: 'unspecified_range_test',
+            schema: {
+                id: datatypes.UUID( {
+                    null: false,
+                    unique: true,
+                    primary: true
+                } ),
+                val: datatypes.integer()
+            }
+        } );
+
+        const unspecifieds = await databases.postgres.get( Unspecified, {
+            db,
+            table: 'unspecified_test_store'
+        } );
+
+        const unspecified_table_create_sql = unspecifieds._create_table_sql();
+        expect( unspecified_table_create_sql ).toMatch( 'val integer' );
+    } );
 } );

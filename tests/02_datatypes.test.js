@@ -21,6 +21,24 @@ describe( 'datatypes', () => {
         } );
     } );
 
+    it( 'integer', () => {
+        expect( typeof datatypes.integer ).toEqual( 'function' );
+        expect( datatypes.integer() ).toMatchObject( {
+            datatype: 'integer',
+            options: expect.objectContaining( {
+                null: expect.any( Boolean ),
+                range: expect.objectContaining( {
+                    min: undefined,
+                    max: undefined
+                } ),
+                unique: expect.any( Boolean ),
+                initial: undefined
+            } ),
+            initial: expect.any( Function ),
+            validate: expect.any( Function )
+        } );
+    } );
+
     it( 'ISODate', () => {
         expect( typeof datatypes.ISODate ).toEqual( 'function' );
         expect( datatypes.ISODate() ).toMatchObject( {
