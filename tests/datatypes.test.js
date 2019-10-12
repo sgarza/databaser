@@ -94,7 +94,8 @@ describe( 'datatypes', () => {
                     max: undefined
                 } ),
                 unique: expect.any( Boolean ),
-                initial: undefined
+                initial: undefined,
+                validate: undefined
             } ),
             initial: expect.any( Function ),
             validate: expect.any( Function )

@@ -3,6 +3,8 @@
 const extend = require( 'extend' );
 const uuid = require( 'uuid' );
 
+const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 module.exports = _options => {
     const options = extend( true, {
         null: true,
@@ -30,9 +32,7 @@ module.exports = _options => {
                 return;
             }
 
-            return value !== null && !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test( value ) ? {
-                error: 'invalid value format'
-            } : undefined;
+            return value !== null && !UUID_REGEX.test( value ) ? 'invalid value format' : undefined;
         }
     };
 };

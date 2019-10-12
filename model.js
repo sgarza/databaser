@@ -49,14 +49,12 @@ module.exports = _options => {
                     const input_value = object_traverser.get( this.path );
                     const error = value.validate( input_value );
                     if ( error ) {
-                        errors.push( {
-                            error
-                        } );
+                        errors.push( error );
                     }
                 }
             } );
 
-            return errors.length ? errors : null;
+            return errors.length ? errors : undefined;
         }
     };
 };

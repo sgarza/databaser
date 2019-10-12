@@ -20,9 +20,7 @@ module.exports = _options => {
         },
         validate: value => {
             if ( !options.null && value === null ) {
-                return {
-                    error: 'null value not allowed'
-                };
+                return 'null value not allowed';
             }
             else if ( options.null && value === null ) {
                 return;
@@ -33,9 +31,7 @@ module.exports = _options => {
                 return undefined;
             }
             catch( ex ) {
-                return {
-                    error: 'invalid value format'
-                };
+                return 'invalid value format';
             }
         },
         serialize: value => {

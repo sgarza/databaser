@@ -10,7 +10,8 @@ module.exports = _options => {
             max: undefined
         },
         unique: false,
-        initial: undefined
+        initial: undefined,
+        validate: undefined
     }, _options );
 
     return {
@@ -25,30 +26,29 @@ module.exports = _options => {
         },
         validate: value => {
             if ( !options.null && value === null ) {
-                return {
-                    error: 'null value not allowed'
-                };
+                return 'null value not allowed';
             }
             else if ( options.null && value === null ) {
                 return;
             }
 
             if ( typeof value !== 'string' ) {
-                return {
-                    error: 'invalid type'
-                };
+                return 'invalid type';
             }
 
             if ( options.length.min && value.length < options.length.min ) {
-                return {
-                    error: 'too short'
-                };
+                return 'too short';
             }
 
             if ( options.length.max && value.length > options.length.max ) {
-                return {
-                    error: 'too long'
-                };
+                return 'too long';
+            }
+
+            if ( typeof options.validate === 'function' ) {
+                const error = options.validate( value );
+                if ( error ) {
+                    return error;
+                }
             }
 
             return;

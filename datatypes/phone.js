@@ -3,6 +3,8 @@
 const extend = require( 'extend' );
 const string = require( './string.js' );
 
+const PHONE_REGEX = /^\+(?:[0-9]){6,14}[0-9]$/;
+
 module.exports = _options => {
     const options = extend( true, {
         null: true,
@@ -32,9 +34,7 @@ module.exports = _options => {
                 return error;
             }
 
-            return value !== null && !/^\+(?:[0-9]){6,14}[0-9]$/.test( value ) ? {
-                error: 'invalid value format'
-            } : undefined;
+            return value !== null && !PHONE_REGEX.test( value ) ? 'invalid value format' : undefined;
         }
     };
 };

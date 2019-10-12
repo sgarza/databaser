@@ -32,9 +32,7 @@ module.exports = _options => {
                 return error;
             }
 
-            return value !== null && !/^.+\@.+\..+$/.test( value ) ? {
-                error: 'invalid value format'
-            } : undefined;
+            return value !== null && !/^.+\@.+\..+$/.test( value ) ? 'invalid value format' : undefined;
         }
     };
 };

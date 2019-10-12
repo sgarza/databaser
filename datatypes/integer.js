@@ -25,30 +25,22 @@ module.exports = _options => {
         },
         validate: value => {
             if ( !options.null && value === null ) {
-                return {
-                    error: 'null value not allowed'
-                };
+                return 'null value not allowed';
             }
             else if ( options.null && value === null ) {
                 return;
             }
 
             if ( typeof value !== 'number' ) {
-                return {
-                    error: 'invalid type'
-                };
+                return 'invalid type';
             }
 
             if ( options.range.min && value < options.range.min ) {
-                return {
-                    error: 'value below minumum'
-                };
+                return 'value below minumum';
             }
 
             if ( options.range.max && value > options.range.max ) {
-                return {
-                    error: 'value above maximum'
-                };
+                return 'value above maximum';
             }
 
             return;
