@@ -8,6 +8,8 @@ const db = {
     password: 'postgres'
 };
 
+const POSTGRES_VERSION = '10';
+
 describe( 'postgres', () => {
 
     beforeAll( async () => {
@@ -29,7 +31,7 @@ describe( 'postgres', () => {
             --health-timeout="5s" \
             --health-start-period="10s" \
             --name databaser-test-postgres \
-            postgres:latest` );
+            postgres:${ POSTGRES_VERSION }` );
 
         let postgres_ready = false;
         do {
@@ -309,5 +311,75 @@ describe( 'postgres', () => {
 
         const unspecified_table_create_sql = unspecifieds._create_table_sql();
         expect( unspecified_table_create_sql ).toMatch( 'val integer' );
+    } );
+
+    it( 'should serialize/deserialize a JSON object properly', async () => {
+        const JSONObject = model( {
+            name: 'jsonobject',
+            schema: {
+                id: datatypes.UUID( {
+                    null: false,
+                    unique: true,
+                    primary: true
+                } ),
+                val: datatypes.JSON( {
+                    initial: {}
+                } )
+            }
+        } );
+
+        const jsonobject = JSONObject.create( {
+            val: {
+                foo: 'bar'
+            }
+        } );
+
+        const jsonobjects = await databases.postgres.get( JSONObject, {
+            db,
+            table: 'jsonobjects'
+        } );
+
+        await jsonobjects.put( jsonobject );
+
+        const stored = await jsonobjects.get( jsonobject.id );
+
+        expect( stored.val ).toEqual( {
+            foo: 'bar'
+        } );
+
+        await jsonobjects.close();
+    } );
+
+    it( 'should serialize/deserialize a JSON array properly', async () => {
+        const JSONArray = model( {
+            name: 'jsonarray',
+            schema: {
+                id: datatypes.UUID( {
+                    null: false,
+                    unique: true,
+                    primary: true
+                } ),
+                val: datatypes.JSON( {
+                    initial: []
+                } )
+            }
+        } );
+
+        const jsonarray = JSONArray.create( {
+            val: [ 1, 2, 3 ]
+        } );
+
+        const jsonarrays = await databases.postgres.get( JSONArray, {
+            db,
+            table: 'jsonarrays'
+        } );
+
+        await jsonarrays.put( jsonarray );
+
+        const stored = await jsonarrays.get( jsonarray.id );
+
+        expect( stored.val ).toEqual( [ 1, 2, 3 ] );
+
+        await jsonarrays.close();
     } );
 } );
