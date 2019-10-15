@@ -40,7 +40,7 @@ describe( 'postgres', () => {
     }, 60 * 1000 ); // 60 seconds to set up docker container
 
     afterAll( async () => {
-        //child_process.execSync( 'docker rm --force --volumes databaser-test-postgres' );
+        child_process.execSync( 'docker rm --force --volumes databaser-test-postgres' );
     } );
 
     it( 'should handle objects with only a primary key', async () => {
