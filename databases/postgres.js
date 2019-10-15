@@ -413,6 +413,10 @@ module.exports = {
                 return results;
             },
 
+            open: async function() {
+                await this._init();
+            },
+
             close: async function() {
                 if ( this._pool ) {
                     const pool = await this._pool.get();

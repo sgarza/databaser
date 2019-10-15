@@ -100,6 +100,34 @@ describe( 'postgres', () => {
         expect( foos ).toHaveProperty( 'connected', false );
     } );
 
+    it( 'should connect on calling open() and disconnect on close()', async () => {
+        const Model = model( {
+            name: 'testmodel',
+            schema: {
+                id: datatypes.UUID( {
+                    null: false,
+                    unique: true,
+                    primary: true
+                } )
+            }
+        } );
+
+        const instances = await databases.postgres.get( Model, {
+            db,
+            table: 'open_test'
+        } );
+
+        expect( instances ).toHaveProperty( 'connected', false );
+
+        await instances.open();
+
+        expect( instances ).toHaveProperty( 'connected', true );
+
+        await instances.close();
+
+        expect( instances ).toHaveProperty( 'connected', false );
+    } );
+
     it( 'should store a model instance', async () => {
         const User = model( {
             name: 'user',
