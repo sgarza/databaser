@@ -341,12 +341,24 @@ module.exports = {
                         const input = criteria_traverser.get( this.path );
                         if ( typeof input !== 'undefined' ) {
                             const column_name = options.column_name( this.path );
-                            clauses.push( `${ column_name } = $${ values.length + 1 }` );
-
                             const value = criteria_traverser.get( this.path );
-                            const serializer = options.serializers[ column_name ] || DATATYPE_SERIALIZERS[ field.datatype ];
-                            const serialized_value = serializer ? serializer( value ) : value;
-                            values.push( serialized_value );
+
+                            if ( Array.isArray( value ) ) {
+                                const or_clauses = [];
+                                for ( let i = 0; i < value.length; ++i ) {
+                                    or_clauses.push( `${ column_name } = $${ values.length + 1 }` );
+                                    const serializer = options.serializers[ column_name ] || DATATYPE_SERIALIZERS[ field.datatype ];
+                                    const serialized_value = serializer ? serializer( value[ i ] ) : value[ i ];
+                                    values.push( serialized_value );
+                                }
+                                clauses.push( `( ${ or_clauses.join( ' OR ' ) } )` );
+                            }
+                            else {
+                                clauses.push( `${ column_name } = $${ values.length + 1 }` );
+                                const serializer = options.serializers[ column_name ] || DATATYPE_SERIALIZERS[ field.datatype ];
+                                const serialized_value = serializer ? serializer( value ) : value;
+                                values.push( serialized_value );
+                            }
                         }
                         return;
                     }

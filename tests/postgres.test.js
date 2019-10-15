@@ -113,6 +113,47 @@ describe( 'postgres', () => {
         await users.close();
     } );
 
+    it( 'should find a model instance with multiple options for a value (SQL OR clause)', async () => {
+        const User = model( {
+            name: 'user',
+            schema: {
+                id: datatypes.UUID( {
+                    null: false,
+                    unique: true,
+                    primary: true
+                } ),
+                email: datatypes.email( {
+                    initial: null
+                } )
+            }
+        } );
+
+        const user = User.create( {
+            email: 'find@domain.com'
+        } );
+
+        const users = await databases.postgres.get( User, {
+            db,
+            table: 'users_find_array'
+        } );
+
+        await users.put( user );
+
+        const stored_users = await users.find( {
+            email: [
+                'foo@bar.com',
+                'find@domain.com',
+                'baz@yak.com'
+            ]
+        } );
+
+        expect( Array.isArray( stored_users ) ).toBe( true );
+        expect( Array.isArray( stored_users ) && stored_users.length ).toBe( 1 );
+        expect( Array.isArray( stored_users ) && stored_users.length && stored_users[ 0 ] ).toEqual( user );
+
+        await users.close();
+    } );
+
     it( 'should delete a model instance', async () => {
         const User = model( {
             name: 'user',
