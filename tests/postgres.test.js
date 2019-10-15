@@ -40,7 +40,64 @@ describe( 'postgres', () => {
     }, 60 * 1000 ); // 60 seconds to set up docker container
 
     afterAll( async () => {
-        child_process.execSync( 'docker rm --force --volumes databaser-test-postgres' );
+        //child_process.execSync( 'docker rm --force --volumes databaser-test-postgres' );
+    } );
+
+    it( 'should handle objects with only a primary key', async () => {
+        const PrimaryOnly = model( {
+            name: 'primaryonly',
+            schema: {
+                id: datatypes.UUID( {
+                    null: false,
+                    unique: true,
+                    primary: true
+                } )
+            }
+        } );
+
+        const primary_onlys = await databases.postgres.get( PrimaryOnly, {
+            db,
+            table: 'primary_only_test'
+        } );
+
+        const primary_only = PrimaryOnly.create( {} );
+        await primary_onlys.put( primary_only );
+
+        const stored = await primary_onlys.get( primary_only.id );
+
+        expect( stored ).toEqual( primary_only );
+
+        await primary_onlys.close();
+    } );
+
+    it( 'should have a connected getter', async () => {
+        const Foo = model( {
+            name: 'foo',
+            schema: {
+                id: datatypes.UUID( {
+                    null: false,
+                    unique: true,
+                    primary: true
+                } )
+            }
+        } );
+
+        const foos = await databases.postgres.get( Foo, {
+            db,
+            table: 'connected_test'
+        } );
+
+        expect( foos ).toHaveProperty( 'connected', false );
+
+        const foo = Foo.create( {} );
+
+        await foos.put( foo );
+
+        expect( foos ).toHaveProperty( 'connected', true );
+
+        await foos.close();
+
+        expect( foos ).toHaveProperty( 'connected', false );
     } );
 
     it( 'should store a model instance', async () => {

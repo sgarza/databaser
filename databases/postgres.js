@@ -93,6 +93,7 @@ const PG_POOL = {
         const options = extend( true, defaults, _options );
 
         return {
+            connected: false,
             get: async function() {
                 if ( this._pool ) {
                     return this._pool;
@@ -104,11 +105,14 @@ const PG_POOL = {
                     console.log( `Postgres pool created [ ${ options.db.user }@${ options.db.host }:${ options.db.port } SSL: ${ !!options.db.ssl } db: ${ options.db.database } ]` );
                 } 
 
+                this.connected = true;
+
                 this._pool.on( 'error', async error => {
                     console.error( `Unexpected postgres pool error: ${ error }` );
                     const __pool = this._pool;
                     this._pool = null;
                     await __pool.end();
+                    this.connected = false;
                     console.error( '  Terminated pool.' );
                 } );
             
@@ -150,6 +154,7 @@ module.exports = {
         const db = {
             options,
             _pool: options.pool || PG_POOL.create( options ),
+
             _create_table_sql: function() {
                 const columns = {};
                 traverse( model.options.schema ).forEach( function( field ) {
@@ -180,6 +185,7 @@ module.exports = {
 
                 return `CREATE TABLE IF NOT EXISTS ${ options.table } (${ clauses.join( ', ' ) });`;
             },
+
             _init: async function() {
                 if ( this._initialized ) {
                     return;
@@ -262,6 +268,10 @@ module.exports = {
                 return model.create( deserialized );
             },
 
+            get connected() {
+                return this._pool.connected;
+            },
+
             query: async function( query ) {
                 await this._init();
                 const pool = await this._pool.get();
@@ -293,12 +303,19 @@ module.exports = {
 
                 const serialized = await this._serialize( object );
                 const sorted_fields = Object.keys( serialized ).sort();
-                const query = `INSERT
+                let query = `INSERT
                     INTO ${ options.table } (${ sorted_fields })
-                    VALUES(${ sorted_fields.map( ( field, index ) => `$${ index + 1 }` ).join( ', ' ) })
+                    VALUES(${ sorted_fields.map( ( field, index ) => `$${ index + 1 }` ).join( ', ' ) })`;
+
+                const on_conflict_statements = sorted_fields.map( ( field, index ) => field === options.primary_key ? '' : `${ field } = $${ index + 1 }` ).filter( statement => statement.length );
+
+                if ( on_conflict_statements.length ) {
+                    query += `
                     ON CONFLICT(${ options.primary_key })
                         DO UPDATE SET
                             ${ sorted_fields.map( ( field, index ) => field === options.primary_key ? '' : `${ field } = $${ index + 1 }` ).filter( statement => statement.length ).join( ', ' ) }`;
+                }
+
                 const values = sorted_fields.map( field => serialized[ field ] );
 
                 if ( options.debug ) {
@@ -399,7 +416,8 @@ module.exports = {
             close: async function() {
                 if ( this._pool ) {
                     const pool = await this._pool.get();
-                    return pool.end();
+                    await pool.end();
+                    this._pool.connected = false;
                 }
             }
         };
