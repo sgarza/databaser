@@ -35,7 +35,7 @@ module.exports = _options => {
                 this.update( value );
             } );
 
-            const object = extend( true, initial_object, _object );
+            const object = extend( true, {}, initial_object, _object );
             return object;
         },
 
