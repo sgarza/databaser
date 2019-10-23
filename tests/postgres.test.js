@@ -16,7 +16,10 @@ describe( 'postgres', () => {
         child_process.execSync( 'docker -v' ); // throws if no docker installed
 
         try {
-            child_process.execSync( 'docker rm --force --volumes databaser-test-postgres' ); // clean up any left-over container
+            // clean up any left-over container
+            child_process.execSync( 'docker rm --force --volumes databaser-test-postgres', {
+                stdio: 'ignore'
+            } );
         }
         catch( ex ) {
             // do nothing, it's ok if this failed since the container may not be orphaned to clean up
@@ -235,6 +238,64 @@ describe( 'postgres', () => {
         expect( Array.isArray( stored_users ) ).toBe( true );
         expect( Array.isArray( stored_users ) && stored_users.length ).toBe( 1 );
         expect( Array.isArray( stored_users ) && stored_users.length && stored_users[ 0 ] ).toEqual( user );
+
+        await users.close();
+    } );
+
+    it( 'should sort multiple results properly', async () => {
+        const User = model( {
+            name: 'user',
+            schema: {
+                id: datatypes.UUID( {
+                    null: false,
+                    unique: true,
+                    primary: true
+                } ),
+                email: datatypes.email( {
+                    initial: null
+                } ),
+                created_at: datatypes.ISODate()
+            }
+        } );
+
+        const users = await databases.postgres.get( User, {
+            db,
+            table: 'users_find_and_sort'
+        } );
+
+        const created_users = [];
+        for ( let index = 0; index < 5; ++index ) {
+            const user = User.create( {
+                email: `find_and_sort_${ index }@domain.com`
+            } );
+
+            created_users.push( user );
+
+            await users.put( user );
+        }
+
+        const descending_created_users = [ ...created_users ].sort( ( lhs, rhs ) => -1 * lhs.created_at.localeCompare( rhs.created_at ) );
+        const ascending_created_users = [ ...created_users ].sort( ( lhs, rhs ) => lhs.created_at.localeCompare( rhs.created_at ) );
+
+        const descending_found_users = await users.find( {}, {
+            order: {
+                column: 'created_at',
+                sort: 'desc'
+            }
+        } );
+
+        const ascending_found_users = await users.find( {}, {
+            order: {
+                column: 'created_at',
+                sort: 'asc'
+            }
+        } );
+
+        expect( Array.isArray( descending_found_users ) ).toBe( true );
+        expect( Array.isArray( ascending_found_users ) ).toBe( true );
+
+        expect( descending_found_users ).toEqual( descending_created_users );
+        expect( ascending_found_users ).toEqual( ascending_created_users );
 
         await users.close();
     } );

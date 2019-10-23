@@ -390,7 +390,7 @@ module.exports = {
                     }
                 }, _find_options );
     
-                const ordering = typeof find_options.order.column_name === 'string' ? `ORDER BY ${ find_options.order.column } ${ find_options.order.sort }` : '';
+                const ordering = typeof find_options.order.column === 'string' ? `ORDER BY ${ find_options.order.column } ${ find_options.order.sort }` : '';
 
                 const query = [
                     `SELECT * FROM ${ options.table } ${ clauses.length ? `WHERE ${ clauses.join( ' AND ' ) }` : '' }`,
