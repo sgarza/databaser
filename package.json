@@ -1,10 +1,10 @@
 {
   "name": "databaser",
-  "version": "2.3.2",
+  "version": "2.4.0",
   "description": "database thing",
   "main": "index.js",
   "scripts": {
-    "test": "JEST_CIRCUS=1 jest --verbose=false"
+    "test": "JEST_CIRCUS=1 jest --verbose=true"
   },
   "author": "Andy Burke <andy.burke@mailbox.earth>",
   "license": "MIT",

@@ -427,7 +427,7 @@ describe( 'postgres', () => {
         } );
 
         const smallint_table_create_sql = smallints._create_table_sql();
-        expect( smallint_table_create_sql ).toMatch( 'val smallint' );
+        expect( smallint_table_create_sql ).toMatch( 'val SMALLINT' );
 
         const Integer = model( {
             name: 'integer_test',
@@ -452,7 +452,7 @@ describe( 'postgres', () => {
         } );
 
         const integer_table_create_sql = integers._create_table_sql();
-        expect( integer_table_create_sql ).toMatch( 'val integer' );
+        expect( integer_table_create_sql ).toMatch( 'val INTEGER' );
 
         const Bigint = model( {
             name: 'bigint_test',
@@ -477,7 +477,7 @@ describe( 'postgres', () => {
         } );
 
         const bigint_table_create_sql = bigints._create_table_sql();
-        expect( bigint_table_create_sql ).toMatch( 'val bigint' );
+        expect( bigint_table_create_sql ).toMatch( 'val BIGINT' );
 
         const Unspecified = model( {
             name: 'unspecified_range_test',
@@ -497,7 +497,7 @@ describe( 'postgres', () => {
         } );
 
         const unspecified_table_create_sql = unspecifieds._create_table_sql();
-        expect( unspecified_table_create_sql ).toMatch( 'val integer' );
+        expect( unspecified_table_create_sql ).toMatch( 'val INTEGER' );
     } );
 
     it( 'should serialize/deserialize a JSON object properly', async () => {

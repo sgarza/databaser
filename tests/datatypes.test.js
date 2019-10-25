@@ -3,6 +3,20 @@
 const { datatypes } = require( '../index.js' );
 
 describe( 'datatypes', () => {
+    it( 'enum', () => {
+        expect( typeof datatypes.enum ).toEqual( 'function' );
+        expect( datatypes.enum() ).toMatchObject( {
+            datatype: 'enum',
+            options: expect.objectContaining( {
+                null: expect.any( Boolean ),
+                initial: undefined,
+                values: expect.any( Array )
+            } ),
+            initial: expect.any( Function ),
+            validate: expect.any( Function )
+        } );
+    } );
+
     it( 'email', () => {
         expect( typeof datatypes.email ).toEqual( 'function' );
         expect( datatypes.email() ).toMatchObject( {

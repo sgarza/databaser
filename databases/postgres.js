@@ -10,14 +10,23 @@ const DATATYPE_MAP = {
     email: field => {
         return field.options.length.max ? `VARCHAR(${ field.options.length.max })` : 'TEXT';
     },
+    enum: () => {
+        // NOTE: we store enums as strings in postgres for a few reasons:
+        //   - there's no trivial CREATE TYPE ... IF NOT EXISTS
+        //   - if you modify the values allowed in the enum, we would need to do a lot of altering, and might not know
+        //     exactly how that should be handled
+        //   - there's disagreement about doing this altering since it cannot happen in a transaction
+        // so we will just store it as TEXT for now
+        return 'TEXT';
+    },
     integer: field => {
         const RANGES = {
-            'smallint': [ -32768, 32767 ],
-            'integer': [ -2147483648, 2147483647 ],
-            'bigint': [ -9223372036854775808, 9223372036854775807 ]
+            'SMALLINT': [ -32768, 32767 ],
+            'INTEGER': [ -2147483648, 2147483647 ],
+            'BIGINT': [ -9223372036854775808, 9223372036854775807 ]
         };
 
-        let storage_type = 'integer';
+        let storage_type = 'INTEGER';
 
         if ( typeof field.options.range.min === 'number' || typeof field.options.range.max === 'number' ) {
             for ( const type of Object.keys( RANGES ) ) {
