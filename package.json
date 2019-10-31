@@ -1,6 +1,6 @@
 {
   "name": "databaser",
-  "version": "2.4.0",
+  "version": "2.5.0",
   "description": "database thing",
   "main": "index.js",
   "scripts": {
@@ -9,12 +9,12 @@
   "author": "Andy Burke <andy.burke@mailbox.earth>",
   "license": "MIT",
   "devDependencies": {
-    "eslint": "^6.5.1",
+    "eslint": "^6.6.0",
     "jest": "^24.9.0",
     "jest-circus": "^24.9.0"
   },
   "dependencies": {
-    "date-fns": "^2.4.1",
+    "date-fns": "^2.6.0",
     "extend": "^3.0.2",
     "pg": "^7.12.1",
     "pluralize": "^8.0.0",

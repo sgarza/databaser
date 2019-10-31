@@ -569,4 +569,35 @@ describe( 'postgres', () => {
 
         await jsonarrays.close();
     } );
+
+    it( 'should serialize/deserialize a number properly', async () => {
+        const TestModel = model( {
+            name: 'number_test',
+            schema: {
+                id: datatypes.UUID( {
+                    null: false,
+                    unique: true,
+                    primary: true
+                } ),
+                value: datatypes.number()
+            }
+        } );
+
+        const test = TestModel.create( {
+            value: Math.random() * 1000
+        } );
+
+        const tests = await databases.postgres.get( TestModel, {
+            db,
+            table: 'datatypes_number'
+        } );
+
+        await tests.put( test );
+
+        const stored = await tests.get( test.id );
+
+        expect( stored ).toEqual( test );
+
+        await tests.close();
+    } );
 } );

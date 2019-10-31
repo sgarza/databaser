@@ -15,7 +15,7 @@ module.exports = _options => {
     }, _options );
 
     return {
-        datatype: 'integer',
+        datatype: 'number',
         options,
         initial: () => {
             if ( typeof options.initial !== 'undefined' ) {
@@ -34,10 +34,6 @@ module.exports = _options => {
 
             if ( typeof value !== 'number' ) {
                 return 'invalid type';
-            }
-
-            if ( !Number.isInteger( value ) ) {
-                return 'invalid value';
             }
 
             if ( options.range.min && value < options.range.min ) {

@@ -52,6 +52,9 @@ const DATATYPE_MAP = {
     JSON: () => {
         return 'JSONB';
     },
+    number: () => {
+        return 'NUMERIC';
+    },
     phone: field => {
         return field.options.length.max ? `VARCHAR(${ field.options.length.max })` : 'TEXT';
     },
@@ -75,8 +78,11 @@ const DATATYPE_SERIALIZERS = {
 const DATATYPE_DESERIALIZERS = {
     ISODate: value => {
         return value ? new Date( value ).toISOString() : value;
-    }
+    },
     // no need for JSON deserializer, postgres automatically deserializes
+    number: value => {
+        return typeof value === 'string' ? Number( value ) : value;
+    }
 };
 
 const PG_POOL = {
