@@ -600,4 +600,51 @@ describe( 'postgres', () => {
 
         await tests.close();
     } );
+
+    it( 'should support column_type_overrides', async () => {
+        const Model = model( {
+            name: 'testoverrides',
+            schema: {
+                id: datatypes.UUID( {
+                    null: false,
+                    unique: true,
+                    primary: true
+                } ),
+                foo: datatypes.JSON( {
+                    initial: null
+                } )
+            }
+        } );
+
+        const instances = await databases.postgres.get( Model, {
+            db,
+            table: 'column_type_overrides_test',
+            column_type_overrides: {
+                foo: 'TEXT'
+            },
+            serializers: {
+                foo: JSON.stringify.bind( JSON )
+            },
+            deserializers: {
+                foo: JSON.parse.bind( JSON )
+            }
+        } );
+
+        const table_create_sql = instances._create_table_sql();
+        expect( table_create_sql ).toMatch( 'foo TEXT' );
+
+        const test = Model.create( {
+            foo: {
+                blah: true
+            }
+        } );
+
+        await instances.put( test );
+
+        const stored = await instances.get( test.id );
+
+        expect( stored ).toEqual( test );
+
+        await instances.close();
+    } );
 } );

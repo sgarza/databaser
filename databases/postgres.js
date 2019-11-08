@@ -142,6 +142,7 @@ module.exports = {
         const options = extend( true, {
             debug: false,
             table: pluralize( model.options.name ),
+            column_type_overrides: {},
             serializers: {},
             deserializers: {},
             column_name: path => {
@@ -181,7 +182,7 @@ module.exports = {
                         }
         
                         columns[ key ] = {
-                            type: mapper( field ),
+                            type: options.column_type_overrides[ key ] ? options.column_type_overrides[ key ] : mapper( field ),
                             options: field.options
                         };
                         return;

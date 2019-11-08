@@ -26,6 +26,7 @@ const User = model( {
                 initial: null
             } )
         },
+        meta: datatypes.JSON(),
         created_at: datatypes.ISODate(),
         updated_at: datatypes.ISODate(),
         deleted_at: datatypes.ISODate( {
@@ -52,7 +53,19 @@ const User = model( {
         ` );
     }
 
-    const users_db = await databases.postgres.get( User );
+    // for the example's sake, we could store the 'meta' field as another type
+    // with column_type_overrides/serializers/deserializers, eg:
+    const users_db = await databases.postgres.get( User, {
+        column_type_overrides: {
+            meta: 'TEXT'
+        },
+        serializers: {
+            meta: JSON.stringify.bind( JSON )
+        },
+        deserializers: {
+            meta: JSON.parse.bind( JSON )
+        }
+    } );
     await users_db.put( user );
 
     const fetched_user = await users.get( user.id );
