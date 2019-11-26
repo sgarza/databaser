@@ -245,16 +245,17 @@ module.exports = {
                 const object_traverser = traverse( object );
                 const serialized_traverser = traverse( serialized );
 
-                schema_traverser.forEach( function( field ) {
+                const schema_paths = schema_traverser.paths();
+                for ( const path of schema_paths ) {
+                    const field = schema_traverser.get( path );
                     if ( typeof field === 'object' && !!field && field.datatype ) {
-                        const key = options.column_name( this.path );
-                        const value = object_traverser.get( this.path );
+                        const key = options.column_name( path );
+                        const value = object_traverser.get( path );
                         const serializer = options.serializers[ key ] || DATATYPE_SERIALIZERS[ field.datatype ];
-                        const serialized_value = serializer ? serializer( value ) : value;
+                        const serialized_value = serializer ? await serializer( value ) : value;
                         serialized_traverser.set( [ key ], serialized_value );
-                        return;
                     }
-                } );
+                }
 
                 return serialized;
             },
@@ -270,16 +271,17 @@ module.exports = {
                 const object_traverser = traverse( object );
                 const deserialized_traverser = traverse( deserialized );
 
-                schema_traverser.forEach( function( field ) {
+                const schema_paths = schema_traverser.paths();
+                for ( const path of schema_paths ) {
+                    const field = schema_traverser.get( path );
                     if ( typeof field === 'object' && !!field && field.datatype ) {
-                        const key = options.column_name( this.path );
+                        const key = options.column_name( path );
                         const value = object_traverser.get( [ key ] );
                         const deserializer = options.deserializers[ key ] || DATATYPE_DESERIALIZERS[ field.datatype ];
-                        const deserialized_value = deserializer ? deserializer( value ) : value;
-                        deserialized_traverser.set( this.path, deserialized_value );
-                        return;
+                        const deserialized_value = deserializer ? await deserializer( value ) : value;
+                        deserialized_traverser.set( path, deserialized_value );
                     }
-                } );
+                }
 
                 return model.create( deserialized );
             },
@@ -369,19 +371,21 @@ module.exports = {
                 const schema_traverser = traverse( model.options.schema );
                 const criteria_traverser = traverse( criteria );
 
-                schema_traverser.forEach( function( field ) {
+                const schema_paths = schema_traverser.paths();
+                for ( const path of schema_paths ) {
+                    const field = schema_traverser.get( path );
                     if ( typeof field === 'object' && !!field && field.datatype ) {
-                        const input = criteria_traverser.get( this.path );
+                        const input = criteria_traverser.get( path );
                         if ( typeof input !== 'undefined' ) {
-                            const column_name = options.column_name( this.path );
-                            const value = criteria_traverser.get( this.path );
+                            const column_name = options.column_name( path );
+                            const value = criteria_traverser.get( path );
 
                             if ( Array.isArray( value ) ) {
                                 const or_clauses = [];
                                 for ( let i = 0; i < value.length; ++i ) {
                                     or_clauses.push( `${ column_name } = $${ values.length + 1 }` );
                                     const serializer = options.serializers[ column_name ] || DATATYPE_SERIALIZERS[ field.datatype ];
-                                    const serialized_value = serializer ? serializer( value[ i ] ) : value[ i ];
+                                    const serialized_value = serializer ? await serializer( value[ i ] ) : value[ i ];
                                     values.push( serialized_value );
                                 }
                                 clauses.push( `( ${ or_clauses.join( ' OR ' ) } )` );
@@ -389,13 +393,12 @@ module.exports = {
                             else {
                                 clauses.push( `${ column_name } = $${ values.length + 1 }` );
                                 const serializer = options.serializers[ column_name ] || DATATYPE_SERIALIZERS[ field.datatype ];
-                                const serialized_value = serializer ? serializer( value ) : value;
+                                const serialized_value = serializer ? await serializer( value ) : value;
                                 values.push( serialized_value );
                             }
                         }
-                        return;
                     }
-                } );
+                }
 
                 const find_options = extend( true, {
                     limit: 10,

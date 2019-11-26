@@ -647,4 +647,53 @@ describe( 'postgres', () => {
 
         await instances.close();
     } );
+
+    it( 'should support async serialize/deserialize', async () => {
+        const Model = model( {
+            name: 'testasyncserialization',
+            schema: {
+                id: datatypes.UUID( {
+                    null: false,
+                    unique: true,
+                    primary: true
+                } ),
+                foo: datatypes.string( {
+                    initial: null
+                } )
+            }
+        } );
+
+        async function sleep( ms ) {
+            return new Promise( resolve => setTimeout( resolve, ms ) );
+        }
+
+        const instances = await databases.postgres.get( Model, {
+            db,
+            table: 'async_serialization_test',
+            serializers: {
+                foo: async function( value ) {
+                    await sleep( 1000 );
+                    return value.split( '' ).reverse().join( '' );
+                }
+            },
+            deserializers: {
+                foo: async function( serialized ) {
+                    await sleep( 1000 );
+                    return serialized.split( '' ).reverse().join( '' );
+                }
+            }
+        } );
+
+        const test = Model.create( {
+            foo: 'blah'
+        } );
+
+        await instances.put( test );
+
+        const stored = await instances.get( test.id );
+
+        expect( stored ).toEqual( test );
+
+        await instances.close();
+    } );
 } );
