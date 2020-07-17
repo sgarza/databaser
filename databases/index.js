@@ -1,5 +1,5 @@
 'use strict';
 
 module.exports = {
-    postgres: require( './postgres.js' )
+	postgres: require( './postgres.js' )
 };

@@ -54,7 +54,7 @@ module.exports = _options => {
                 }
             } );
 
-            return errors.length ? errors : undefined;
+            return errors;
         }
     };
 };
