@@ -664,7 +664,7 @@ describe( 'postgres', () => {
 		} );
 
 		async function sleep( ms ) {
-			return new Promise( resolve => setTimeout( resolve, ms ) );
+			return new Promise( ( resolve ) => setTimeout( resolve, ms ) );
 		}
 
 		const instances = await databases.postgres.get( Model, {
