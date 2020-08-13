@@ -7,19 +7,17 @@ const pluralize = require( 'pluralize' );
 const traverse = require( 'traverse' );
 
 const DATATYPE_MAP = {
-	email: field => {
-		return field.options.length.max ? `VARCHAR(${ field.options.length.max })` : 'TEXT';
-	},
-	enum: () => {
-		// NOTE: we store enums as strings in postgres for a few reasons:
-		//   - there's no trivial CREATE TYPE ... IF NOT EXISTS
-		//   - if you modify the values allowed in the enum, we would need to do a lot of altering, and might not know
-		//	 exactly how that should be handled
-		//   - there's disagreement about doing this altering since it cannot happen in a transaction
-		// so we will just store it as TEXT for now
-		return 'TEXT';
-	},
-	integer: field => {
+	email: ( field ) => ( field.options.length.max ? `VARCHAR(${ field.options.length.max })` : 'TEXT' ),
+
+	// NOTE: we store enums as strings in postgres for a few reasons:
+	//   - there's no trivial CREATE TYPE ... IF NOT EXISTS
+	//   - if you modify the values allowed in the enum, we would need to do a lot of altering, and might not know
+	//	 exactly how that should be handled
+	//   - there's disagreement about doing this altering since it cannot happen in a transaction
+	// so we will just store it as TEXT for now
+	enum: () => ( 'TEXT' ),
+
+	integer: ( field ) => {
 		const RANGES = {
 			'SMALLINT': [ -32768, 32767 ],
 			'INTEGER': [ -2147483648, 2147483647 ],
@@ -46,47 +44,35 @@ const DATATYPE_MAP = {
 
 		return storage_type;
 	},
-	ISODate: () => {
-		return 'TIMESTAMPTZ';
-	},
-	JSON: () => {
-		return 'JSONB';
-	},
-	number: () => {
-		return 'NUMERIC';
-	},
-	phone: field => {
-		return field.options.length.max ? `VARCHAR(${ field.options.length.max })` : 'TEXT';
-	},
-	string: field => {
-		return field.options.length.max ? `VARCHAR(${ field.options.length.max })` : 'TEXT';
-	},
-	UUID: () => {
-		return 'UUID';
-	}
+
+	ISODate: () => ( 'TIMESTAMPTZ' ),
+
+	JSON: () => ( 'JSONB' ),
+
+	number: () => ( 'NUMERIC' ),
+
+	phone: ( field ) => ( field.options.length.max ? `VARCHAR(${ field.options.length.max })` : 'TEXT' ),
+
+	string: ( field ) => ( field.options.length.max ? `VARCHAR(${ field.options.length.max })` : 'TEXT' ),
+
+	UUID: () => ( 'UUID' )
 };
 
 const DATATYPE_SERIALIZERS = {
-	ISODate: value => {
-		return value ? dates.format( new Date( value ), 'yyyy-MM-dd HH:mm:ss.SSSSSX' ) : value;
-	},
-	JSON: value => {
-		return value ? JSON.stringify( value ) : value;
-	}
+	ISODate: ( value ) => ( value ? dates.format( new Date( value ), 'yyyy-MM-dd HH:mm:ss.SSSSSX' ) : value ),
+
+	JSON: ( value ) => ( value ? JSON.stringify( value ) : value )
 };
 
 const DATATYPE_DESERIALIZERS = {
-	ISODate: value => {
-		return value ? new Date( value ).toISOString() : value;
-	},
+	ISODate: ( value ) => ( value ? new Date( value ).toISOString() : value ),
+
 	// no need for JSON deserializer, postgres automatically deserializes
-	number: value => {
-		return typeof value === 'string' ? Number( value ) : value;
-	}
+	number: ( value ) => ( typeof value === 'string' ? Number( value ) : value )
 };
 
 const PG_POOL = {
-	create: _options => {
+	create: ( _options ) => {
 
 		const defaults = {
 			debug: false,
@@ -122,7 +108,7 @@ const PG_POOL = {
 
 				this.connected = true;
 
-				this._pool.on( 'error', async error => {
+				this._pool.on( 'error', async ( error ) => {
 					console.error( `Unexpected postgres pool error: ${ error }` );
 					const __pool = this._pool;
 					this._pool = null;
@@ -145,9 +131,7 @@ module.exports = {
 			column_type_overrides: {},
 			serializers: {},
 			deserializers: {},
-			column_name: path => {
-				return path.join( '__' );
-			},
+			column_name: ( path ) => ( path.join( '__' ) ),
 			primary_key: null
 		}, _options );
 
@@ -164,7 +148,7 @@ module.exports = {
 		}
 
 		if ( !options.primary_key ) {
-			throw new Error( `No primary key for model: ${ model.name }` );
+			throw new Error( `No primary key for model: ${ model.options.name }` );
 		}
 
 		const db = {
@@ -189,13 +173,13 @@ module.exports = {
 					}
 				} );
 			
-				const clauses = Object.keys( columns ).map( key => {
+				const clauses = Object.keys( columns ).map( ( key ) => {
 					const column = columns[ key ];
 					const modifiers = [
 						column.options.unique ? 'UNIQUE' : null,
 						column.options.primary ? 'PRIMARY KEY' : null,
 						column.options.null === false ? 'NOT NULL' : null
-					].filter( value => !!value );
+					].filter( ( value ) => ( !!value ) );
 					return `${ key } ${ column.type }${ modifiers.length ? ` ${ modifiers.join( ' ' ) }` : '' }`;
 				} );
 
@@ -216,7 +200,7 @@ module.exports = {
 							}
 							else {
 								retry_count++ < 100 ? setTimeout( check, 100 ) : reject( new Error( {
-									error: `timed out initializing postgres db driver for model: ${ model.name }`
+									error: `timed out initializing postgres db driver for model: ${ model.options.name }`
 								} ) );
 							}
 						};
@@ -302,7 +286,7 @@ module.exports = {
 
 				const pool = await this._pool.get();
 				const result = await pool.query( {
-					name: `fetch-${ model.name }`,
+					name: `fetch-${ model.options.name }`,
 					text: `SELECT * FROM ${ options.table } WHERE ${ options.primary_key } = $1`,
 					values: [ key ]
 				} );
@@ -325,16 +309,16 @@ module.exports = {
 					INTO ${ options.table } (${ sorted_fields })
 					VALUES(${ sorted_fields.map( ( field, index ) => `$${ index + 1 }` ).join( ', ' ) })`;
 
-				const on_conflict_statements = sorted_fields.map( ( field, index ) => field === options.primary_key ? '' : `${ field } = $${ index + 1 }` ).filter( statement => statement.length );
+				const on_conflict_statements = sorted_fields.map( ( field, index ) => ( field === options.primary_key ? '' : `${ field } = $${ index + 1 }` ) ).filter( ( statement ) => statement.length );
 
 				if ( on_conflict_statements.length ) {
 					query += `
 					ON CONFLICT(${ options.primary_key })
 						DO UPDATE SET
-							${ sorted_fields.map( ( field, index ) => field === options.primary_key ? '' : `${ field } = $${ index + 1 }` ).filter( statement => statement.length ).join( ', ' ) }`;
+							${ sorted_fields.map( ( field, index ) => ( field === options.primary_key ? '' : `${ field } = $${ index + 1 }` ) ).filter( ( statement ) => statement.length ).join( ', ' ) }`;
 				}
 
-				const values = sorted_fields.map( field => serialized[ field ] );
+				const values = sorted_fields.map( ( field ) => ( serialized[ field ] ) );
 
 				if ( options.debug ) {
 					console.log( query );

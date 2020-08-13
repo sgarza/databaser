@@ -68,15 +68,15 @@ const User = model( {
 	} );
 	await users_db.put( user );
 
-	const fetched_user = await users.get( user.id );
+	const fetched_user = await users_db.get( user.id );
 	console.log( `Fetched same user: ${ fetched_user && fetched_user.id === user.id }` );
 
-	const found_user = await users.find( {
+	const found_user = await users_db.find( {
 		email: 'foo@bar.com'
 	} );
 	console.log( `Found same user: ${ found_user && found_user.id === user.id }` );
 
-	await users.del( user.id );
+	await users_db.del( user.id );
 	console.log( 'Deleted user from db.' );
 } )();
 ```
