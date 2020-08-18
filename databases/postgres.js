@@ -6,6 +6,33 @@ const pg = require( 'pg' );
 const pluralize = require( 'pluralize' );
 const traverse = require( 'traverse' );
 
+// TODO: remove this if https://github.com/brianc/node-postgres/issues/1789 is fixed
+pg.Pool.prototype.__connect = pg.Pool.prototype.connect;
+pg.Pool.prototype.connect = function ( callback ) {
+	this.__retries = this.__retries ?? 0;
+	const max_retries = this.options.retries ?? 10;
+
+	try {
+		this.__connect( ( error, client ) => {
+			if ( error && error.code === 'ECONNREFUSED' && this.__retries < max_retries ) {
+				console.warn( `ECONNREFUSED connecting to Postgres, retrying... (${ this.__retries + 1 })` );
+				this.__retries++;
+				setTimeout( this.connect.bind( this, callback ), 1000 );
+				return;
+			}
+			callback( error, client );
+		} );
+	} catch ( ex ) {
+		if ( ex.toString().includes( 'ECONNREFUSED' ) && this.__retries < max_retries ) {
+			console.warn( `ECONNREFUSED connecting to Postgres, retrying... (${ this.__retries + 1 })` );
+			this.__retries++;
+			setTimeout( this.connect.bind( this, callback ), 1000 );
+		} else {
+			throw ex;
+		}
+	}
+};
+
 const DATATYPE_MAP = {
 	email: ( field ) => ( field.options.length.max ? `VARCHAR(${ field.options.length.max })` : 'TEXT' ),
 
@@ -100,7 +127,7 @@ const PG_POOL = {
 				if ( this._pool ) {
 					return this._pool;
 				}
-			
+
 				this._pool = new pg.Pool( options.db );
 
 				if ( options.debug ) {
