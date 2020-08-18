@@ -81,7 +81,8 @@ const PG_POOL = {
 				port: process.env.POSTGRES_PORT || '5432',
 				user: process.env.POSTGRES_USER || 'postgres',
 				password: process.env.POSTGRES_PASSWORD,
-				database: process.env.POSTGRES_DATABASE || 'postgres'
+				database: process.env.POSTGRES_DATABASE || 'postgres',
+				connectionTimeoutMillis: 1000 * 10
 			}
 		};
 
@@ -392,7 +393,7 @@ module.exports = {
 						sort: 'desc'
 					}
 				}, _find_options );
-	
+
 				const ordering = typeof find_options.order.column === 'string' ? `ORDER BY ${ find_options.order.column } ${ find_options.order.sort }` : '';
 
 				const query = [
