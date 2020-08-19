@@ -2,7 +2,7 @@
 
 const extend = require( 'extend' );
 
-module.exports = _options => {
+module.exports = ( _options ) => {
 	const options = extend( true, {
 		null: true,
 		initial: undefined,
@@ -20,7 +20,7 @@ module.exports = _options => {
 
 			return undefined;
 		},
-		validate: value => {
+		validate: ( value ) => {
 			if ( !options.null && value === null ) {
 				return 'null value not allowed';
 			}

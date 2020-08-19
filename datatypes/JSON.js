@@ -2,7 +2,7 @@
 
 const extend = require( 'extend' );
 
-module.exports = _options => {
+module.exports = ( _options ) => {
 	const options = extend( true, {
 		null: true,
 		initial: undefined
@@ -18,7 +18,7 @@ module.exports = _options => {
 
 			return undefined;
 		},
-		validate: value => {
+		validate: ( value ) => {
 			if ( !options.null && value === null ) {
 				return 'null value not allowed';
 			}
@@ -34,11 +34,7 @@ module.exports = _options => {
 				return 'invalid value format';
 			}
 		},
-		serialize: value => {
-			return JSON.stringify( value );
-		},
-		deserialize: value => {
-			return JSON.parse( value );
-		}
+		serialize: ( value ) => ( JSON.stringify( value ) ),
+		deserialize: ( value ) => ( JSON.parse( value ) )
 	};
 };

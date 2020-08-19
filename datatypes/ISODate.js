@@ -4,7 +4,7 @@ const extend = require( 'extend' );
 
 const ISO_DATE_REGEX = /(\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\d\.\d+([+-][0-2]\d:[0-5]\d|Z))|(\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\d([+-][0-2]\d:[0-5]\d|Z))|(\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d([+-][0-2]\d:[0-5]\d|Z))/;
 
-module.exports = _options => {
+module.exports = ( _options ) => {
 	const options = extend( true, {
 		null: true,
 		initial: undefined
@@ -20,7 +20,7 @@ module.exports = _options => {
 
 			return new Date().toISOString();
 		},
-		validate: value => {
+		validate: ( value ) => {
 			if ( !options.null && value === null ) {
 				return 'null value not allowed';
 			}

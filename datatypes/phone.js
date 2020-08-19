@@ -5,7 +5,7 @@ const string = require( './string.js' );
 
 const PHONE_REGEX = /^\+(?:[0-9]){6,14}[0-9]$/;
 
-module.exports = _options => {
+module.exports = ( _options ) => {
 	const options = extend( true, {
 		null: true,
 		length: {
@@ -28,7 +28,7 @@ module.exports = _options => {
 
 			return undefined;
 		},
-		validate: value => {
+		validate: ( value ) => {
 			const error = base_type.validate( value );
 			if ( error ) {
 				return error;

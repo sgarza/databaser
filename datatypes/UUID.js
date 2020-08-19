@@ -7,7 +7,7 @@ const {
 
 const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
-module.exports = _options => {
+module.exports = ( _options ) => {
 	const options = extend( true, {
 		null: true,
 		unique: false,
@@ -24,7 +24,7 @@ module.exports = _options => {
 
 			return uuidv4();
 		},
-		validate: value => {
+		validate: ( value ) => {
 			if ( !options.null && value === null ) {
 				return {
 					error: 'null value not allowed'

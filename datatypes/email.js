@@ -3,7 +3,7 @@
 const extend = require( 'extend' );
 const string = require( './string.js' );
 
-module.exports = _options => {
+module.exports = ( _options ) => {
 	const options = extend( true, {
 		null: true,
 		length: {
@@ -26,13 +26,13 @@ module.exports = _options => {
 
 			return undefined;
 		},
-		validate: value => {
+		validate: ( value ) => {
 			const error = base_type.validate( value );
 			if ( error ) {
 				return error;
 			}
 
-			return value !== null && !/^.+\@.+\..+$/.test( value ) ? 'invalid value format' : undefined;
+			return value !== null && !/^.+@.+\..+$/.test( value ) ? 'invalid value format' : undefined;
 		}
 	};
 };
