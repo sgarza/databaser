@@ -20,6 +20,9 @@ pg.Pool.prototype.connect = function ( callback ) {
 				setTimeout( this.connect.bind( this, callback ), 1000 );
 				return;
 			}
+			else if ( error ) {
+				console.warn( `Unhandled DB error: ${ error }` );
+			}
 			callback( error, client );
 		} );
 	} catch ( ex ) {
@@ -28,6 +31,7 @@ pg.Pool.prototype.connect = function ( callback ) {
 			this.__retries++;
 			setTimeout( this.connect.bind( this, callback ), 1000 );
 		} else {
+			console.warn( `Unhandled DB exception: ${ ex }` );
 			throw ex;
 		}
 	}
