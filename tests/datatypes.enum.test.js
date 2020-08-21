@@ -41,7 +41,10 @@ describe( 'datatypes.enum', () => {
 		} );
 
 		expect( Enum.validate( good ) ).toEqual( [] );
-		expect( Enum.validate( bad ) ).toEqual( [ 'invalid value' ] );
+		expect( Enum.validate( bad ) ).toEqual( [ {
+			field: 'enum',
+			error: 'invalid value'
+		} ] );
 	} );
 
 	it( 'should allow additional custom validation', () => {
@@ -54,7 +57,7 @@ describe( 'datatypes.enum', () => {
 						'bar',
 						'baz'
 					],
-					validate: value => {
+					validate: ( value ) => {
 						if ( value !== 'foo' ) {
 							return 'not foo';
 						}
@@ -72,6 +75,9 @@ describe( 'datatypes.enum', () => {
 		} );
 
 		expect( Enum.validate( good ) ).toEqual( [] );
-		expect( Enum.validate( bad ) ).toEqual( [ 'not foo' ] );
+		expect( Enum.validate( bad ) ).toEqual( [ {
+			field: 'enum',
+			error: 'not foo'
+		} ] );
 	} );
 } );

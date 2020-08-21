@@ -27,7 +27,7 @@ describe( 'datatypes.string', () => {
 			name: 'validation',
 			schema: {
 				val: datatypes.string( {
-					validate: value => {
+					validate: ( value ) => {
 						if ( value !== 'foo' ) {
 							return 'not foo';
 						}
@@ -45,6 +45,9 @@ describe( 'datatypes.string', () => {
 		} );
 
 		expect( Validation.validate( good ) ).toEqual( [] );
-		expect( Validation.validate( bad ) ).toEqual( [ 'not foo' ] );
+		expect( Validation.validate( bad ) ).toEqual( [ {
+			field: 'val',
+			error: 'not foo'
+		} ] );
 	} );
 } );

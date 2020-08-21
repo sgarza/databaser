@@ -29,21 +29,48 @@ describe( 'postgres', () => {
 			run -d \
 			-p ${ db.host }:${ db.port }:5432/tcp \
 			-e POSTGRES_PASSWORD=${ db.password } \
-			--health-cmd="pg_isready -U ${ db.user }" \
-			--health-interval="10s" \
-			--health-timeout="5s" \
-			--health-start-period="10s" \
+			--health-cmd="nc -z localhost 5432" \
+			--health-interval="1s" \
+			--health-timeout="1s" \
+			--health-start-period="1s" \
 			--name databaser-test-postgres \
 			postgres:${ POSTGRES_VERSION }` );
 
-		let postgres_ready = false;
+		let postgres_listening = false;
 		do {
-			postgres_ready = child_process.execSync( 'docker inspect --format "{{json .State.Health.Status }}" databaser-test-postgres' ).toString().trim().match( /healthy/i );
-		} while( !postgres_ready );
+			postgres_listening = child_process.execSync( 'docker inspect --format "{{json .State.Health.Status }}" databaser-test-postgres' ).toString().trim().match( /healthy/i );
+		} while( !postgres_listening );
 	}, 60 * 1000 ); // 60 seconds to set up docker container
 
 	afterAll( async () => {
 		child_process.execSync( 'docker rm --force --volumes databaser-test-postgres' );
+	} );
+
+	it( 'should wait for postgres to be ready', async () => {
+		const Simple = model( {
+			name: 'simple',
+			schema: {
+				id: datatypes.UUID( {
+					null: false,
+					unique: true,
+					primary: true
+				} )
+			}
+		} );
+
+		const simples = await databases.postgres.get( Simple, {
+			db,
+			table: 'postgres_ready_test'
+		} );
+
+		const simple = Simple.create( {} );
+		await simples.put( simple );
+
+		const stored = await simples.get( simple.id );
+
+		expect( stored ).toEqual( simple );
+
+		await simples.close();
 	} );
 
 	it( 'should handle objects with only a primary key', async () => {

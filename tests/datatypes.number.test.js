@@ -39,7 +39,10 @@ describe( 'datatypes.number', () => {
 		} );
 
 		expect( Validation.validate( good ) ).toEqual( [] );
-		expect( Validation.validate( bad ) ).toEqual( [ 'invalid type' ] );
+		expect( Validation.validate( bad ) ).toEqual( [ {
+			field: 'val',
+			error: 'invalid type'
+		} ] );
 	} );
 
 	it( 'should allow custom validation', () => {
@@ -47,7 +50,7 @@ describe( 'datatypes.number', () => {
 			name: 'validation',
 			schema: {
 				val: datatypes.number( {
-					validate: value => {
+					validate: ( value ) => {
 						if ( value !== 1 ) {
 							return 'not 1';
 						}
@@ -65,6 +68,9 @@ describe( 'datatypes.number', () => {
 		} );
 
 		expect( Validation.validate( good ) ).toEqual( [] );
-		expect( Validation.validate( bad ) ).toEqual( [ 'not 1' ] );
+		expect( Validation.validate( bad ) ).toEqual( [ {
+			field: 'val',
+			error: 'not 1'
+		} ] );
 	} );
 } );

@@ -7,13 +7,13 @@ const pluralize = require( 'pluralize' );
 const traverse = require( 'traverse' );
 
 // TODO: remove this if https://github.com/brianc/node-postgres/issues/1789 is fixed
-pg.Pool.prototype.__connect = pg.Pool.prototype.connect;
+pg.Pool.prototype.___connect = pg.Pool.prototype.connect;
 pg.Pool.prototype.connect = function ( callback ) {
 	this.__retries = this.__retries ?? 0;
 	const max_retries = this.options.retries ?? 10;
 
 	try {
-		this.__connect( ( error, client ) => {
+		this.___connect( ( error, client ) => {
 			if ( error && error.code === 'ECONNREFUSED' && this.__retries < max_retries ) {
 				console.warn( `ECONNREFUSED connecting to Postgres, retrying... (${ this.__retries + 1 })` );
 				this.__retries++;
@@ -21,17 +21,18 @@ pg.Pool.prototype.connect = function ( callback ) {
 				return;
 			}
 			else if ( error ) {
-				console.warn( `Unhandled DB error: ${ error }` );
+				console.warn( `Unhandled DB error: ${ error?.code ?? error.toString() }` );
 			}
 			callback( error, client );
 		} );
 	} catch ( ex ) {
-		if ( ex.toString().includes( 'ECONNREFUSED' ) && this.__retries < max_retries ) {
+		const ex_as_string = ex.toString();
+		if ( ex_as_string.includes( 'ECONNREFUSED' ) && this.__retries < max_retries ) {
 			console.warn( `ECONNREFUSED connecting to Postgres, retrying... (${ this.__retries + 1 })` );
 			this.__retries++;
 			setTimeout( this.connect.bind( this, callback ), 1000 );
 		} else {
-			console.warn( `Unhandled DB exception: ${ ex }` );
+			console.warn( `Unhandled DB exception: ${ ex_as_string }` );
 			throw ex;
 		}
 	}

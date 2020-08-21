@@ -8,17 +8,13 @@ describe( 'model', () => {
 	} );
 
 	it( 'should throw if no name is specified', () => {
-		expect( () => {
-			return model();
-		} ).toThrow( 'name' );
+		expect( () => ( model() ) ).toThrow( 'name' );
 	} );
 
 	it( 'should throw if no schema is specified', () => {
-		expect( () => {
-			return model( {
-				name: 'foo'
-			} );
-		} ).toThrow( 'schema' );
+		expect( () => ( model( {
+			name: 'foo'
+		} ) ) ).toThrow( 'schema' );
 	} );
 
 	it( 'should return a model when given a name and schema', () => {

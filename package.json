@@ -1,6 +1,6 @@
 {
   "name": "databaser",
-  "version": "4.0.0",
+  "version": "4.0.1",
   "description": "database thing",
   "main": "index.js",
   "scripts": {
@@ -10,13 +10,13 @@
   "license": "MIT",
   "devDependencies": {
     "eslint": "^7.7.0",
-    "jest": "^26.4.0",
-    "jest-circus": "^26.4.0"
+    "jest": "^26.4.1",
+    "jest-circus": "^26.4.1"
   },
   "dependencies": {
     "date-fns": "^2.15.0",
     "extend": "^3.0.2",
-    "pg": "^8.3.0",
+    "pg": "^8.3.2",
     "pluralize": "^8.0.0",
     "traverse": "^0.6.6",
     "uuid": "^8.3.0"
