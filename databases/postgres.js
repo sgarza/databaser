@@ -7,6 +7,10 @@ const pluralize = require( 'pluralize' );
 const traverse = require( 'traverse' );
 
 // TODO: remove this if https://github.com/brianc/node-postgres/issues/1789 is fixed
+const RETRYABLE_ERROR_CODES = [
+	'ECONNREFUSED', // connection refused
+	'57P03' // cannot_connect_now
+];
 pg.Pool.prototype.___connect = pg.Pool.prototype.connect;
 pg.Pool.prototype.connect = function ( callback ) {
 	this.__retries = this.__retries ?? 0;
@@ -14,8 +18,8 @@ pg.Pool.prototype.connect = function ( callback ) {
 
 	try {
 		this.___connect( ( error, client ) => {
-			if ( error && error.code === 'ECONNREFUSED' && this.__retries < max_retries ) {
-				console.warn( `ECONNREFUSED connecting to Postgres, retrying... (${ this.__retries + 1 })` );
+			if ( error && RETRYABLE_ERROR_CODES.includes( error.code ) && this.__retries < max_retries ) {
+				console.warn( `Error connecting to Postgres, retrying... (${ this.__retries + 1 })` );
 				this.__retries++;
 				setTimeout( this.connect.bind( this, callback ), 1000 );
 				return;
@@ -28,7 +32,7 @@ pg.Pool.prototype.connect = function ( callback ) {
 	} catch ( ex ) {
 		const ex_as_string = ex.toString();
 		if ( ex_as_string.includes( 'ECONNREFUSED' ) && this.__retries < max_retries ) {
-			console.warn( `ECONNREFUSED connecting to Postgres, retrying... (${ this.__retries + 1 })` );
+			console.warn( `Error connecting to Postgres, retrying... (${ this.__retries + 1 })` );
 			this.__retries++;
 			setTimeout( this.connect.bind( this, callback ), 1000 );
 		} else {
