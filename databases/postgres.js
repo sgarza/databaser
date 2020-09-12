@@ -43,6 +43,8 @@ pg.Pool.prototype.connect = function ( callback ) {
 };
 
 const DATATYPE_MAP = {
+	boolean: () => ( 'BOOLEAN' ),
+
 	email: ( field ) => ( field.options.length.max ? `VARCHAR(${ field.options.length.max })` : 'TEXT' ),
 
 	// NOTE: we store enums as strings in postgres for a few reasons:

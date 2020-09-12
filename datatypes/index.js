@@ -1,6 +1,7 @@
 'use strict';
 
 module.exports = {
+	boolean: require( './boolean.js' ),
 	enum: require( './enum.js' ),
 	email: require( './email.js' ),
 	ISODate: require( './ISODate.js' ),

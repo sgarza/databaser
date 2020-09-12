@@ -597,6 +597,37 @@ describe( 'postgres', () => {
 		await jsonarrays.close();
 	} );
 
+	it( 'should serialize/deserialize a boolean properly', async () => {
+		const TestModel = model( {
+			name: 'boolean_test',
+			schema: {
+				id: datatypes.UUID( {
+					null: false,
+					unique: true,
+					primary: true
+				} ),
+				value: datatypes.boolean()
+			}
+		} );
+
+		const test = TestModel.create( {
+			value: true
+		} );
+
+		const tests = await databases.postgres.get( TestModel, {
+			db,
+			table: 'datatypes_boolean'
+		} );
+
+		await tests.put( test );
+
+		const stored = await tests.get( test.id );
+
+		expect( stored ).toEqual( test );
+
+		await tests.close();
+	} );
+
 	it( 'should serialize/deserialize a number properly', async () => {
 		const TestModel = model( {
 			name: 'number_test',
