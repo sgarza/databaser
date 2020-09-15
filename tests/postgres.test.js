@@ -327,6 +327,66 @@ describe( 'postgres', () => {
 		await users.close();
 	} );
 
+	it( 'should support paths for ordering column', async () => {
+		const User = model( {
+			name: 'user',
+			schema: {
+				id: datatypes.UUID( {
+					null: false,
+					unique: true,
+					primary: true
+				} ),
+				email: datatypes.email( {
+					initial: null
+				} ),
+				timestamps: {
+					created: datatypes.ISODate()
+				}
+			}
+		} );
+
+		const users = await databases.postgres.get( User, {
+			db,
+			table: 'users_find_and_sort_with_column_path'
+		} );
+
+		const created_users = [];
+		for ( let index = 0; index < 5; ++index ) {
+			const user = User.create( {
+				email: `find_and_sort_with_column_path_${ index }@domain.com`
+			} );
+
+			created_users.push( user );
+
+			await users.put( user );
+		}
+
+		const descending_created_users = [ ...created_users ].sort( ( lhs, rhs ) => -1 * lhs.timestamps.created.localeCompare( rhs.timestamps.created ) );
+		const ascending_created_users = [ ...created_users ].sort( ( lhs, rhs ) => lhs.timestamps.created.localeCompare( rhs.timestamps.created ) );
+
+		const descending_found_users = await users.find( {}, {
+			order: {
+				column: [ 'timestamps', 'created' ],
+				sort: 'desc'
+			}
+		} );
+
+		const ascending_found_users = await users.find( {}, {
+			order: {
+				column: [ 'timestamps', 'created' ],
+				sort: 'asc'
+			}
+		} );
+
+		expect( Array.isArray( descending_found_users ) ).toBe( true );
+		expect( Array.isArray( ascending_found_users ) ).toBe( true );
+
+		expect( descending_found_users ).toEqual( descending_created_users );
+		expect( ascending_found_users ).toEqual( ascending_created_users );
+
+		await users.close();
+	} );
+
 	it( 'should delete a model instance', async () => {
 		const User = model( {
 			name: 'user',

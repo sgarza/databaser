@@ -432,7 +432,7 @@ module.exports = {
 					}
 				}, _find_options );
 
-				const ordering = typeof find_options.order.column === 'string' ? `ORDER BY ${ find_options.order.column } ${ find_options.order.sort }` : '';
+				const ordering = find_options.order.column !== null ? `ORDER BY ${ Array.isArray( find_options.order.column ) ? options.column_name( find_options.order.column ) : find_options.order.column } ${ find_options.order.sort }` : '';
 
 				const query = [
 					`SELECT * FROM ${ options.table } ${ clauses.length ? `WHERE ${ clauses.join( ' AND ' ) }` : '' }`,

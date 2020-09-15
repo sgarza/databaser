@@ -27,11 +27,13 @@ const User = model( {
 			} )
 		},
 		meta: datatypes.JSON(),
-		created_at: datatypes.ISODate(),
-		updated_at: datatypes.ISODate(),
-		deleted_at: datatypes.ISODate( {
-			initial: null
-		} )
+		timestamps: {
+			created: datatypes.ISODate(),
+			updated: datatypes.ISODate(),
+			deleted: datatypes.ISODate( {
+				initial: null
+			} )
+		}
 	}
 } );
 
@@ -75,6 +77,24 @@ const User = model( {
 		email: 'foo@bar.com'
 	} );
 	console.log( `Found same user: ${ found_user && found_user.id === user.id }` );
+
+	const newest_user = await users_db.find( {}, {
+		limit: 1,
+		order: {
+			column: [ 'timestamps', 'created' ],
+			sort: 'desc'
+		}
+	} );
+	console.log( `Found newest user: ${ newest_user.id }` );
+
+	const first_email_user = await users_db.find( {}, {
+		limit: 1,
+		order: {
+			column: 'email',
+			sort: 'asc'
+		}
+	} );
+	console.log( `Found user with first lexical email: ${ first_email_user.id }` );
 
 	await users_db.del( user.id );
 	console.log( 'Deleted user from db.' );
