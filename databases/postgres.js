@@ -413,6 +413,31 @@ module.exports = {
 								}
 								clauses.push( `( ${ or_clauses.join( ' OR ' ) } )` );
 							}
+							else if ( typeof value === 'object' && value !== null ) {
+								if ( value.and ) {
+									const and_clauses = [];
+									for ( let i = 0; i < value.and.length; ++i ) {
+										const clause = value.and[ i ];
+										and_clauses.push( `${ column_name } ${ clause.comparison ?? '=' } $${ values.length + 1 }` );
+										const serializer = options.serializers[ column_name ] || DATATYPE_SERIALIZERS[ field.datatype ];
+										const serialized_value = serializer ? await serializer( value.and[ i ].value ) : value.and[ i ].value;
+										values.push( serialized_value );
+									}
+									clauses.push( `( ${ and_clauses.join( ' AND ' ) } )` );
+								}
+
+								if ( value.or ) {
+									const or_clauses = [];
+									for ( let i = 0; i < value.or.length; ++i ) {
+										const clause = value.or[ i ];
+										or_clauses.push( `${ column_name } ${ clause.comparison ?? '=' } $${ values.length + 1 }` );
+										const serializer = options.serializers[ column_name ] || DATATYPE_SERIALIZERS[ field.datatype ];
+										const serialized_value = serializer ? await serializer( value.or[ i ].value ) : value.or[ i ].value;
+										values.push( serialized_value );
+									}
+									clauses.push( `( ${ or_clauses.join( ' OR ' ) } )` );
+								}
+							}
 							else {
 								clauses.push( `${ column_name } = $${ values.length + 1 }` );
 								const serializer = options.serializers[ column_name ] || DATATYPE_SERIALIZERS[ field.datatype ];

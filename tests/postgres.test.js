@@ -269,6 +269,66 @@ describe( 'postgres', () => {
 		await users.close();
 	} );
 
+	it( 'should find a model instance with advanced query on a value', async () => {
+		const Count = model( {
+			name: 'count',
+			schema: {
+				id: datatypes.UUID( {
+					null: false,
+					unique: true,
+					primary: true
+				} ),
+				count: datatypes.integer()
+			}
+		} );
+
+		const counts = await databases.postgres.get( Count, {
+			db,
+			table: 'count_find_advanced'
+		} );
+
+		for ( let i = 0; i < 10; ++i ) {
+			const count = Count.create( {
+				count: i
+			} );
+			await counts.put( count );
+		}
+
+		const matching_counts_with_and = await counts.find( {
+			count: {
+				and: [ {
+					comparison: '>',
+					value: 2
+				}, {
+					comparison: '<',
+					value: 8
+				} ]
+			}
+		} );
+
+		expect( Array.isArray( matching_counts_with_and ) ).toBe( true );
+		expect( Array.isArray( matching_counts_with_and ) && matching_counts_with_and.length ).toBe( 5 ); // 3, 4, 5, 6, 7
+		expect( Array.isArray( matching_counts_with_and ) && matching_counts_with_and.map( ( _count ) => ( _count.count ) ).sort() ).toEqual( [ 3, 4, 5, 6, 7 ] );
+
+		const matching_counts_with_or = await counts.find( {
+			count: {
+				or: [ {
+					comparison: '<',
+					value: 2
+				}, {
+					comparison: '>',
+					value: 8
+				} ]
+			}
+		} );
+
+		expect( Array.isArray( matching_counts_with_or ) ).toBe( true );
+		expect( Array.isArray( matching_counts_with_or ) && matching_counts_with_or.length ).toBe( 3 ); // 0, 1, 9
+		expect( Array.isArray( matching_counts_with_or ) && matching_counts_with_or.map( ( _count ) => ( _count.count ) ).sort() ).toEqual( [ 0, 1, 9 ] );
+
+		await counts.close();
+	} );
+
 	it( 'should sort multiple results properly', async () => {
 		const User = model( {
 			name: 'user',
