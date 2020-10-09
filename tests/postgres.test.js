@@ -874,4 +874,57 @@ describe( 'postgres', () => {
 
 		await instances.close();
 	} );
+
+	it( 'should support where()', async () => {
+		const User = model( {
+			name: 'user',
+			schema: {
+				id: datatypes.UUID( {
+					null: false,
+					unique: true,
+					primary: true
+				} ),
+				email: datatypes.email( {
+					initial: null
+				} ),
+				quote: datatypes.string(),
+				tags: datatypes.JSON( {
+					initial: []
+				} ),
+				created_at: datatypes.ISODate()
+			}
+		} );
+
+		const users = await databases.postgres.get( User, {
+			db,
+			table: 'users_direct_query'
+		} );
+
+		const created_users = [];
+		for ( let index = 0; index < 5; ++index ) {
+			const user = User.create( {
+				email: `users_direct_query${ index }@domain.com`,
+				quote: `this is quote ${ index }`,
+				tags: [ 'one', 'two', 'three', 'four', 'five' ].slice( 0, index + 1 )
+			} );
+
+			created_users.push( user );
+
+			await users.put( user );
+		}
+
+		const users_with_quote_0 = await users.where( 'quote = \'this is quote 0\'' );
+		expect( Array.isArray( users_with_quote_0 ) ).toBe( true );
+		expect( Array.isArray( users_with_quote_0 ) && users_with_quote_0.length ).toBe( 1 );
+
+		const all_users = await users.where( 'quote LIKE $1', [ 'this is quote%' ] );
+		expect( Array.isArray( all_users ) ).toBe( true );
+		expect( Array.isArray( all_users ) && all_users.length ).toBe( 5 );
+
+		const has_three_tag_users = await users.where( 'tags ? $1', [ 'three' ] );
+		expect( Array.isArray( has_three_tag_users ) ).toBe( true );
+		expect( Array.isArray( has_three_tag_users ) && has_three_tag_users.length ).toBe( 3 );
+
+		await users.close();
+	} );
 } );

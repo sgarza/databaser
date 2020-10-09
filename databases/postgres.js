@@ -320,6 +320,29 @@ module.exports = {
 				return result;
 			},
 
+			where: async function( clauses, values = [], stored_name ) {
+				await this._init();
+				const pool = await this._pool.get();
+
+				let result = undefined;
+				if ( stored_name ) {
+					result = await pool.query( {
+						name: stored_name,
+						text: `SELECT * FROM ${ options.table } WHERE ${ clauses }`,
+						values
+					} );
+				}
+				else {
+					result = await pool.query( `SELECT * FROM ${ options.table } WHERE ${ clauses }`, values );
+				}
+
+				const results = [];
+				for ( const row of result.rows ) {
+					results.push( await this._deserialize( row ) );
+				}
+				return results;
+			},
+
 			get: async function( key ) {
 				await this._init();
 
