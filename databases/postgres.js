@@ -497,8 +497,8 @@ module.exports = {
 				const query = [
 					`SELECT * FROM ${ options.table } ${ clauses.length ? `WHERE ${ clauses.join( ' AND ' ) }` : '' }`,
 					ordering,
-					`LIMIT ${ find_options.limit }`,
-					`OFFSET ${ find_options.offset }`
+					`LIMIT $${ values.length + 1 }`,
+					`OFFSET $${ values.length + 2 }`
 				].join( ' ' );
 
 				if ( options.debug ) {
@@ -507,7 +507,7 @@ module.exports = {
 				}
 
 				const pool = await this._pool.get();
-				const result = await pool.query( query, values );
+				const result = await pool.query( query, values.concat( [ find_options.limit, find_options.offset ] ) );
 				const results = [];
 				for ( const row of result.rows ) {
 					results.push( await this._deserialize( row ) );
