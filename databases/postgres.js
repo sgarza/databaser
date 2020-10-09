@@ -42,6 +42,8 @@ pg.Pool.prototype.connect = function ( callback ) {
 	}
 };
 
+// TODO: do we need to sanitize ordering columns, ordering sorts, limits and offets?
+
 const DATATYPE_MAP = {
 	boolean: () => ( 'BOOLEAN' ),
 
@@ -320,21 +322,31 @@ module.exports = {
 				return result;
 			},
 
-			where: async function( clauses, values = [], stored_name ) {
+			where: async function( _options ) {
 				await this._init();
 				const pool = await this._pool.get();
 
-				let result = undefined;
-				if ( stored_name ) {
-					result = await pool.query( {
-						name: stored_name,
-						text: `SELECT * FROM ${ options.table } WHERE ${ clauses }`,
-						values
-					} );
-				}
-				else {
-					result = await pool.query( `SELECT * FROM ${ options.table } WHERE ${ clauses }`, values );
-				}
+				const find_options = extend( true, {
+					limit: 10,
+					offset: 0,
+					order: {
+						column: null,
+						sort: 'desc'
+					}
+				}, _options.options );
+
+				const values = _options.values ?? [];
+
+				const ordering = find_options.order.column !== null ? `ORDER BY ${ Array.isArray( find_options.order.column ) ? options.column_name( find_options.order.column ) : find_options.order.column } ${ find_options.order.sort }` : '';
+
+				const query = [
+					`SELECT * FROM ${ options.table } WHERE ${ _options.query }`,
+					ordering,
+					`LIMIT $${ values.length + 1 }`,
+					`OFFSET $${ values.length + 2 }`
+				].join( ' ' );
+
+				const result = await pool.query( query, values.concat( [ find_options.limit, find_options.offset ] ) );
 
 				const results = [];
 				for ( const row of result.rows ) {

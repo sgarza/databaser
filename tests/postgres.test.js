@@ -913,17 +913,57 @@ describe( 'postgres', () => {
 			await users.put( user );
 		}
 
-		const users_with_quote_0 = await users.where( 'quote = \'this is quote 0\'' );
+		const users_with_quote_0 = await users.where( {
+			query: 'quote = \'this is quote 0\''
+		} );
 		expect( Array.isArray( users_with_quote_0 ) ).toBe( true );
 		expect( Array.isArray( users_with_quote_0 ) && users_with_quote_0.length ).toBe( 1 );
 
-		const all_users = await users.where( 'quote LIKE $1', [ 'this is quote%' ] );
+		const all_users = await users.where( {
+			query: 'quote LIKE $1',
+			values: [ 'this is quote%' ]
+		} );
 		expect( Array.isArray( all_users ) ).toBe( true );
 		expect( Array.isArray( all_users ) && all_users.length ).toBe( 5 );
 
-		const has_three_tag_users = await users.where( 'tags ? $1', [ 'three' ] );
+		const has_three_tag_users = await users.where( {
+			query: 'tags ? $1',
+			values: [ 'three' ]
+		} );
 		expect( Array.isArray( has_three_tag_users ) ).toBe( true );
 		expect( Array.isArray( has_three_tag_users ) && has_three_tag_users.length ).toBe( 3 );
+
+		const limited_users = await users.where( {
+			query: 'email IS NOT NULL',
+			options: {
+				limit: 2
+			}
+		} );
+		expect( Array.isArray( limited_users ) ).toBe( true );
+		expect( Array.isArray( limited_users ) && limited_users.length ).toBe( 2 );
+
+		const offset_users = await users.where( {
+			query: 'email IS NOT NULL',
+			options: {
+				offset: 2
+			}
+		} );
+		expect( Array.isArray( offset_users ) ).toBe( true );
+		expect( Array.isArray( offset_users ) && offset_users.length ).toBe( 3 );
+
+		const ascending_created_users = [ ...created_users ].sort( ( lhs, rhs ) => lhs.email.localeCompare( rhs.email ) );
+		const sorted_users = await users.where( {
+			query: 'email IS NOT NULL',
+			options: {
+				order: {
+					column: 'email',
+					sort: 'asc'
+				}
+			}
+		} );
+		expect( Array.isArray( sorted_users ) ).toBe( true );
+		expect( Array.isArray( sorted_users ) && sorted_users.length ).toBe( 5 );
+		expect( sorted_users ).toEqual( ascending_created_users );
 
 		await users.close();
 	} );
