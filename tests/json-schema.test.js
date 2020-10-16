@@ -23,11 +23,25 @@ describe( 'json-schema', () => {
 				meta: datatypes.JSON(),
 				weight: datatypes.number(),
 				phone: datatypes.phone(),
-				name: datatypes.string( {
-					length: {
-						min: 2
+				name: {
+					first: datatypes.string( {
+						length: {
+							min: 2
+						}
+					} ),
+					last: datatypes.string( {
+						length: {
+							min: 2
+						}
+					} )
+				},
+				foo: {
+					bar: {
+						baz: datatypes.string( {
+							null: false
+						} )
 					}
-				} )
+				}
 			}
 		} );
 		
@@ -73,8 +87,33 @@ describe( 'json-schema', () => {
 					maxLength: 32
 				},
 				name: {
-					type: 'string',
-					minLength: 2
+					type: 'object',
+					properties: {
+						first: {
+							type: 'string',
+							minLength: 2
+						},
+						last: {
+							type: 'string',
+							minLength: 2
+						}
+					},
+					required: []
+				},
+				foo: {
+					type: 'object',
+					properties: {
+						bar: {
+							type: 'object',
+							properties: {
+								baz: {
+									type: 'string'
+								}
+							},
+							required: [ 'baz' ]
+						}
+					},
+					required: []
 				}
 			}
 		} );

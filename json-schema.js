@@ -54,23 +54,59 @@ const DATATYPE_MAP = {
 	} )
 };
 
+function property_map( value ) {
+	if ( Array.isArray( value ) && this.path[ this.path.length - 1 ] === 'required' ) {
+		this.update( value );
+		return;
+	}
+
+	if ( typeof value !== 'object' ) {
+		this.update( value );
+		return;
+	}
+
+	if ( value.datatype ) {
+		this.update( DATATYPE_MAP[ value.datatype ]( value ), true );
+		return;
+	}
+
+	if ( value !== null && value.type && value.properties ) {
+		this.update( value );
+		return;
+	}
+
+	if ( value !== null && value.__processed ) {
+		this.update( value );
+		return;
+	}
+
+	if ( value !== null ) {
+
+		const schema = {
+			type: 'object',
+			properties: Object.assign( {}, value, { __processed: true } ),
+			required: Object.keys( value ).reduce( ( _required, key ) => {
+				if ( typeof value[ key ] === 'object' && !!value[ key ] && value[ key ].datatype && value[ key ].options.null === false ) {
+					_required.push( key );
+				}
+				return _required;
+			}, [] )
+		};
+
+		this.update( schema );
+		return;
+	}
+
+	this.update( value );
+}
+
 module.exports = ( model ) => {
-	const schema = {
-		type: 'object',
-		required: [],
-		properties: {}
-	};
-
-	const schema_traverser = traverse( schema );
-
-	traverse( model.options.schema ).forEach( function( field ) {
-		if ( typeof field === 'object' && !!field && field.datatype ) {
-			schema_traverser.set( [ 'properties', ...this.path ], DATATYPE_MAP[ field.datatype ]( field ) );
-			if ( field.options.null === false ) {
-				schema.required.push( this.path.join( '.' ) );
-			}
+	const first_pass_schema = traverse( model.options.schema ).map( property_map );
+	const schema = traverse( first_pass_schema ).map( function() { 
+		const name = this.path[ this.path.length - 1 ];
+		if ( name === '__processed' ) {
+			this.remove();
 		}
 	} );
-
 	return schema;
 };
