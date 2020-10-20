@@ -61,6 +61,7 @@ describe( 'json-schema', () => {
 				},
 				email: {
 					type: 'string',
+					format: 'email',
 					minLength: 5
 				},
 				state: {
@@ -74,7 +75,8 @@ describe( 'json-schema', () => {
 					type: 'integer'
 				},
 				created: {
-					type: 'string'
+					type: 'string',
+					format: 'date-time'
 				},
 				meta: {
 					type: 'string'
@@ -84,6 +86,7 @@ describe( 'json-schema', () => {
 				},
 				phone: {
 					type: 'string',
+					format: 'phone',
 					maxLength: 32
 				},
 				name: {

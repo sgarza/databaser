@@ -10,6 +10,7 @@ const DATATYPE_MAP = {
 	} ),
 	email: ( field ) => ( {
 		type: 'string',
+		format: 'email',
 		minLength: field.options.length.min
 	} ),
 	enum: ( field ) => ( {
@@ -20,7 +21,8 @@ const DATATYPE_MAP = {
 		type: 'integer'
 	} ),
 	ISODate: () => ( {
-		type: 'string'
+		type: 'string',
+		format: 'date-time'
 	} ),
 	JSON: () => ( {
 		type: 'string'
@@ -30,6 +32,7 @@ const DATATYPE_MAP = {
 	} ),
 	phone: ( field ) => ( {
 		type: 'string',
+		format: 'phone',
 		maxLength: field.options.length.max
 	} ),
 	string: ( field ) => {
@@ -49,6 +52,7 @@ const DATATYPE_MAP = {
 	},
 	UUID: () => ( {
 		type: 'string',
+		format: 'uuid',
 		minLength: 36,
 		maxLength: 36
 	} )
