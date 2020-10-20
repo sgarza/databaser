@@ -32,7 +32,6 @@ const DATATYPE_MAP = {
 	} ),
 	phone: ( field ) => ( {
 		type: 'string',
-		format: 'phone',
 		maxLength: field.options.length.max
 	} ),
 	string: ( field ) => {
