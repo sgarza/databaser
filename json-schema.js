@@ -30,7 +30,7 @@ const DATATYPE_MAP = {
 		example: field.options.example
 	} ),
 	JSON: ( field ) => ( {
-		type: 'string',
+		type: 'object',
 		example: field.options.example
 	} ),
 	number: ( field ) => ( {

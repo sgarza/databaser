@@ -6,7 +6,9 @@ module.exports = ( _options ) => {
 	const options = extend( true, {
 		null: true,
 		initial: undefined,
-		example: '{ "foo": "bar" }'
+		example: {
+			foo: 'bar'
+		}
 	}, _options );
 
 	return {

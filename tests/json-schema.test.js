@@ -92,8 +92,10 @@ describe( 'json-schema', () => {
 					example: '2020-10-21T03:53:01.873Z'
 				},
 				meta: {
-					type: 'string',
-					example: '{ "foo": "bar" }'
+					type: 'object',
+					example: { 
+						foo: 'bar'
+					}
 				},
 				weight: {
 					type: 'number',
