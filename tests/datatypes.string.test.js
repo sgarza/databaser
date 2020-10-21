@@ -8,7 +8,7 @@ describe( 'datatypes.string', () => {
 		expect( datatypes.string() ).toMatchObject( {
 			datatype: 'string',
 			options: expect.objectContaining( {
-				null: expect.any( Boolean ),
+				nullable: expect.any( Boolean ),
 				length: expect.objectContaining( {
 					min: undefined,
 					max: undefined

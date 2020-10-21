@@ -8,7 +8,7 @@ describe( 'datatypes.number', () => {
 		expect( datatypes.number() ).toMatchObject( {
 			datatype: 'number',
 			options: expect.objectContaining( {
-				null: expect.any( Boolean ),
+				nullable: expect.any( Boolean ),
 				unique: expect.any( Boolean ),
 				range: expect.objectContaining( {
 					min: undefined,

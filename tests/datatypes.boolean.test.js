@@ -8,7 +8,7 @@ describe( 'datatypes.boolean', () => {
 		expect( datatypes.boolean() ).toMatchObject( {
 			datatype: 'boolean',
 			options: expect.objectContaining( {
-				null: expect.any( Boolean ),
+				nullable: expect.any( Boolean ),
 				initial: undefined,
 				validate: undefined
 			} ),

@@ -11,7 +11,7 @@ const User = model( {
 	name: 'user',
 	schema: {
 		id: datatypes.UUID( {
-			null: false,
+			nullable: false,
 			unique: true,
 			primary: true
 		} ),

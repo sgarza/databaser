@@ -8,7 +8,7 @@ describe( 'datatypes', () => {
 		expect( datatypes.enum() ).toMatchObject( {
 			datatype: 'enum',
 			options: expect.objectContaining( {
-				null: expect.any( Boolean ),
+				nullable: expect.any( Boolean ),
 				initial: undefined,
 				values: expect.any( Array )
 			} ),
@@ -22,7 +22,7 @@ describe( 'datatypes', () => {
 		expect( datatypes.email() ).toMatchObject( {
 			datatype: 'email',
 			options: expect.objectContaining( {
-				null: expect.any( Boolean ),
+				nullable: expect.any( Boolean ),
 				length: expect.objectContaining( {
 					min: expect.any( Number ),
 					max: undefined
@@ -40,7 +40,7 @@ describe( 'datatypes', () => {
 		expect( datatypes.integer() ).toMatchObject( {
 			datatype: 'integer',
 			options: expect.objectContaining( {
-				null: expect.any( Boolean ),
+				nullable: expect.any( Boolean ),
 				range: expect.objectContaining( {
 					min: undefined,
 					max: undefined
@@ -58,7 +58,7 @@ describe( 'datatypes', () => {
 		expect( datatypes.ISODate() ).toMatchObject( {
 			datatype: 'ISODate',
 			options: expect.objectContaining( {
-				null: expect.any( Boolean ),
+				nullable: expect.any( Boolean ),
 				initial: undefined
 			} ),
 			initial: expect.any( Function ),
@@ -71,7 +71,7 @@ describe( 'datatypes', () => {
 		expect( datatypes.JSON() ).toMatchObject( {
 			datatype: 'JSON',
 			options: expect.objectContaining( {
-				null: expect.any( Boolean ),
+				nullable: expect.any( Boolean ),
 				initial: undefined
 			} ),
 			initial: expect.any( Function ),
@@ -84,7 +84,7 @@ describe( 'datatypes', () => {
 		expect( datatypes.phone() ).toMatchObject( {
 			datatype: 'phone',
 			options: expect.objectContaining( {
-				null: expect.any( Boolean ),
+				nullable: expect.any( Boolean ),
 				length: expect.objectContaining( {
 					min: undefined,
 					max: expect.any( Number )
@@ -102,7 +102,7 @@ describe( 'datatypes', () => {
 		expect( datatypes.string() ).toMatchObject( {
 			datatype: 'string',
 			options: expect.objectContaining( {
-				null: expect.any( Boolean ),
+				nullable: expect.any( Boolean ),
 				length: expect.objectContaining( {
 					min: undefined,
 					max: undefined
@@ -121,7 +121,7 @@ describe( 'datatypes', () => {
 		expect( datatypes.UUID() ).toMatchObject( {
 			datatype: 'UUID',
 			options: expect.objectContaining( {
-				null: expect.any( Boolean ),
+				nullable: expect.any( Boolean ),
 				unique: expect.any( Boolean ),
 				initial: undefined
 			} ),

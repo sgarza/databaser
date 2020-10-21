@@ -1,7 +1,7 @@
 'use strict';
 
 const dates = require( 'date-fns' );
-const extend = require( 'extend' );
+const deepmerge = require( 'deepmerge' );
 const pg = require( 'pg' );
 const pluralize = require( 'pluralize' );
 const traverse = require( 'traverse' );
@@ -112,7 +112,7 @@ const DATATYPE_DESERIALIZERS = {
 };
 
 const PG_POOL = {
-	create: ( _options ) => {
+	create: ( _options = {} ) => {
 
 		const defaults = {
 			debug: false,
@@ -132,7 +132,7 @@ const PG_POOL = {
 			};
 		}
 		
-		const options = extend( true, defaults, _options );
+		const options = deepmerge( defaults, _options );
 
 		return {
 			connected: false,
@@ -165,8 +165,8 @@ const PG_POOL = {
 };
 
 module.exports = {
-	get: ( model, _options ) => {
-		const options = extend( true, {
+	get: ( model, _options = {} ) => {
+		const options = deepmerge( {
 			debug: false,
 			table: pluralize( model.options.name ),
 			column_type_overrides: {},
@@ -219,7 +219,7 @@ module.exports = {
 					const modifiers = [
 						column.options.unique ? 'UNIQUE' : null,
 						column.options.primary ? 'PRIMARY KEY' : null,
-						column.options.null === false ? 'NOT NULL' : null
+						column.options.nullable === false ? 'NOT NULL' : null
 					].filter( ( value ) => ( !!value ) );
 					return `${ key } ${ column.type }${ modifiers.length ? ` ${ modifiers.join( ' ' ) }` : '' }`;
 				} );
@@ -322,18 +322,18 @@ module.exports = {
 				return result;
 			},
 
-			where: async function( _options ) {
+			where: async function( _options = {} ) {
 				await this._init();
 				const pool = await this._pool.get();
 
-				const find_options = extend( true, {
+				const find_options = deepmerge( {
 					limit: 10,
 					offset: 0,
 					order: {
 						column: null,
 						sort: 'desc'
 					}
-				}, _options.options );
+				}, _options.options ?? {} );
 
 				const values = _options.values ?? [];
 
@@ -420,7 +420,7 @@ module.exports = {
 				return deleted;
 			},
 
-			find: async function( criteria, _find_options ) {
+			find: async function( criteria, _find_options = {} ) {
 				await this._init();
 
 				const clauses = [];
@@ -483,7 +483,7 @@ module.exports = {
 					}
 				}
 
-				const find_options = extend( true, {
+				const find_options = deepmerge( {
 					limit: 10,
 					offset: 0,
 					order: {

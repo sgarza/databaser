@@ -1,11 +1,11 @@
 'use strict';
 
-const extend = require( 'extend' );
+const deepmerge = require( 'deepmerge' );
 const string = require( './string.js' );
 
-module.exports = ( _options ) => {
-	const options = extend( true, {
-		null: true,
+module.exports = ( _options = {} ) => {
+	const options = deepmerge( {
+		nullable: true,
 		length: {
 			min: 5,
 			max: undefined

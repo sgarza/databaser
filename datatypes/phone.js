@@ -1,13 +1,13 @@
 'use strict';
 
-const extend = require( 'extend' );
+const deepmerge = require( 'deepmerge' );
 const string = require( './string.js' );
 
 const PHONE_REGEX = /^\+(?:[0-9]){6,14}[0-9]$/;
 
-module.exports = ( _options ) => {
-	const options = extend( true, {
-		null: true,
+module.exports = ( _options = {} ) => {
+	const options = deepmerge( {
+		nullable: true,
 		length: {
 			min: undefined,
 			max: 32

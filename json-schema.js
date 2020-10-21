@@ -7,45 +7,54 @@ const traverse = require( 'traverse' );
 const DATATYPE_MAP = {
 	boolean: ( field ) => ( {
 		type: 'boolean',
-		example: field.options.example
+		example: field.options.example,
+		nullable: field.options.nullable
 	} ),
 	email: ( field ) => ( {
 		type: 'string',
 		format: 'email',
 		minLength: field.options.length.min,
-		example: field.options.example
+		example: field.options.example,
+		nullable: field.options.nullable
 	} ),
 	enum: ( field ) => ( {
 		type: 'string',
 		enum: field.options.values,
-		example: field.options.example
+		example: field.options.example,
+		nullable: field.options.nullable
 	} ),
 	integer: ( field ) => ( {
 		type: 'integer',
-		example: field.options.example
+		example: field.options.example,
+		nullable: field.options.nullable
 	} ),
 	ISODate: ( field ) => ( {
 		type: 'string',
 		format: 'date-time',
-		example: field.options.example
+		example: field.options.example,
+		nullable: field.options.nullable
 	} ),
 	JSON: ( field ) => ( {
 		type: 'object',
-		example: field.options.example
+		example: field.options.example,
+		nullable: field.options.nullable
 	} ),
 	number: ( field ) => ( {
 		type: 'number',
-		example: field.options.example
+		example: field.options.example,
+		nullable: field.options.nullable
 	} ),
 	phone: ( field ) => ( {
 		type: 'string',
 		maxLength: field.options.length.max,
-		example: field.options.example
+		example: field.options.example,
+		nullable: field.options.nullable
 	} ),
 	string: ( field ) => {
 		const schema = {
 			type: 'string',
-			example: field.options.example
+			example: field.options.example,
+			nullable: field.options.nullable
 		};
 
 		if ( typeof field.options.length.min === 'number' ) {
@@ -63,7 +72,8 @@ const DATATYPE_MAP = {
 		format: 'uuid',
 		minLength: 36,
 		maxLength: 36,
-		example: field.options.example
+		example: field.options.example,
+		nullable: field.options.nullable
 	} )
 };
 
@@ -99,7 +109,7 @@ function property_map( value ) {
 			type: 'object',
 			properties: Object.assign( {}, value, { __processed: true } ),
 			required: Object.keys( value ).reduce( ( _required, key ) => {
-				if ( typeof value[ key ] === 'object' && !!value[ key ] && value[ key ].datatype && value[ key ].options.null === false ) {
+				if ( typeof value[ key ] === 'object' && !!value[ key ] && value[ key ].datatype && value[ key ].options.nullable === false ) {
 					_required.push( key );
 				}
 				return _required;

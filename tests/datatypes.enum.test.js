@@ -8,7 +8,7 @@ describe( 'datatypes.enum', () => {
 		expect( datatypes.enum() ).toMatchObject( {
 			datatype: 'enum',
 			options: expect.objectContaining( {
-				null: expect.any( Boolean ),
+				nullable: expect.any( Boolean ),
 				initial: undefined,
 				validate: undefined,
 				values: expect.any( Array )

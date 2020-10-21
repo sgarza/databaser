@@ -1,10 +1,10 @@
 'use strict';
 
-const extend = require( 'extend' );
+const deepmerge = require( 'deepmerge' );
 
-module.exports = ( _options ) => {
-	const options = extend( true, {
-		null: true,
+module.exports = ( _options = {} ) => {
+	const options = deepmerge( {
+		nullable: true,
 		initial: undefined,
 		example: {
 			foo: 'bar'
@@ -22,10 +22,10 @@ module.exports = ( _options ) => {
 			return undefined;
 		},
 		validate: ( value ) => {
-			if ( !options.null && value === null ) {
+			if ( !options.nullable && value === null ) {
 				return 'null value not allowed';
 			}
-			else if ( options.null && value === null ) {
+			else if ( options.nullable && value === null ) {
 				return;
 			}
 

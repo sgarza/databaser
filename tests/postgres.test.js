@@ -51,7 +51,7 @@ describe( 'postgres', () => {
 			name: 'simple',
 			schema: {
 				id: datatypes.UUID( {
-					null: false,
+					nullable: false,
 					unique: true,
 					primary: true
 				} )
@@ -78,7 +78,7 @@ describe( 'postgres', () => {
 			name: 'primaryonly',
 			schema: {
 				id: datatypes.UUID( {
-					null: false,
+					nullable: false,
 					unique: true,
 					primary: true
 				} )
@@ -105,7 +105,7 @@ describe( 'postgres', () => {
 			name: 'foo',
 			schema: {
 				id: datatypes.UUID( {
-					null: false,
+					nullable: false,
 					unique: true,
 					primary: true
 				} )
@@ -135,7 +135,7 @@ describe( 'postgres', () => {
 			name: 'testmodel',
 			schema: {
 				id: datatypes.UUID( {
-					null: false,
+					nullable: false,
 					unique: true,
 					primary: true
 				} )
@@ -163,7 +163,7 @@ describe( 'postgres', () => {
 			name: 'user',
 			schema: {
 				id: datatypes.UUID( {
-					null: false,
+					nullable: false,
 					unique: true,
 					primary: true
 				} ),
@@ -196,7 +196,7 @@ describe( 'postgres', () => {
 			name: 'user',
 			schema: {
 				id: datatypes.UUID( {
-					null: false,
+					nullable: false,
 					unique: true,
 					primary: true
 				} ),
@@ -233,7 +233,7 @@ describe( 'postgres', () => {
 			name: 'user',
 			schema: {
 				id: datatypes.UUID( {
-					null: false,
+					nullable: false,
 					unique: true,
 					primary: true
 				} ),
@@ -274,7 +274,7 @@ describe( 'postgres', () => {
 			name: 'count',
 			schema: {
 				id: datatypes.UUID( {
-					null: false,
+					nullable: false,
 					unique: true,
 					primary: true
 				} ),
@@ -334,7 +334,7 @@ describe( 'postgres', () => {
 			name: 'user',
 			schema: {
 				id: datatypes.UUID( {
-					null: false,
+					nullable: false,
 					unique: true,
 					primary: true
 				} ),
@@ -392,7 +392,7 @@ describe( 'postgres', () => {
 			name: 'user',
 			schema: {
 				id: datatypes.UUID( {
-					null: false,
+					nullable: false,
 					unique: true,
 					primary: true
 				} ),
@@ -452,7 +452,7 @@ describe( 'postgres', () => {
 			name: 'user',
 			schema: {
 				id: datatypes.UUID( {
-					null: false,
+					nullable: false,
 					unique: true,
 					primary: true
 				} ),
@@ -491,7 +491,7 @@ describe( 'postgres', () => {
 			name: 'user',
 			schema: {
 				id: datatypes.UUID( {
-					null: false,
+					nullable: false,
 					unique: true,
 					primary: true
 				} ),
@@ -524,7 +524,7 @@ describe( 'postgres', () => {
 			name: 'user',
 			schema: {
 				id: datatypes.UUID( {
-					null: false,
+					nullable: false,
 					unique: true,
 					primary: true
 				} ),
@@ -555,7 +555,7 @@ describe( 'postgres', () => {
 			name: 'smallint_test',
 			schema: {
 				id: datatypes.UUID( {
-					null: false,
+					nullable: false,
 					unique: true,
 					primary: true
 				} ),
@@ -580,7 +580,7 @@ describe( 'postgres', () => {
 			name: 'integer_test',
 			schema: {
 				id: datatypes.UUID( {
-					null: false,
+					nullable: false,
 					unique: true,
 					primary: true
 				} ),
@@ -605,7 +605,7 @@ describe( 'postgres', () => {
 			name: 'bigint_test',
 			schema: {
 				id: datatypes.UUID( {
-					null: false,
+					nullable: false,
 					unique: true,
 					primary: true
 				} ),
@@ -630,7 +630,7 @@ describe( 'postgres', () => {
 			name: 'unspecified_range_test',
 			schema: {
 				id: datatypes.UUID( {
-					null: false,
+					nullable: false,
 					unique: true,
 					primary: true
 				} ),
@@ -652,7 +652,7 @@ describe( 'postgres', () => {
 			name: 'jsonobject',
 			schema: {
 				id: datatypes.UUID( {
-					null: false,
+					nullable: false,
 					unique: true,
 					primary: true
 				} ),
@@ -689,7 +689,7 @@ describe( 'postgres', () => {
 			name: 'jsonarray',
 			schema: {
 				id: datatypes.UUID( {
-					null: false,
+					nullable: false,
 					unique: true,
 					primary: true
 				} ),
@@ -722,7 +722,7 @@ describe( 'postgres', () => {
 			name: 'boolean_test',
 			schema: {
 				id: datatypes.UUID( {
-					null: false,
+					nullable: false,
 					unique: true,
 					primary: true
 				} ),
@@ -753,7 +753,7 @@ describe( 'postgres', () => {
 			name: 'number_test',
 			schema: {
 				id: datatypes.UUID( {
-					null: false,
+					nullable: false,
 					unique: true,
 					primary: true
 				} ),
@@ -784,7 +784,7 @@ describe( 'postgres', () => {
 			name: 'testoverrides',
 			schema: {
 				id: datatypes.UUID( {
-					null: false,
+					nullable: false,
 					unique: true,
 					primary: true
 				} ),
@@ -831,7 +831,7 @@ describe( 'postgres', () => {
 			name: 'testasyncserialization',
 			schema: {
 				id: datatypes.UUID( {
-					null: false,
+					nullable: false,
 					unique: true,
 					primary: true
 				} ),
@@ -880,7 +880,7 @@ describe( 'postgres', () => {
 			name: 'user',
 			schema: {
 				id: datatypes.UUID( {
-					null: false,
+					nullable: false,
 					unique: true,
 					primary: true
 				} ),

@@ -8,7 +8,7 @@ describe( 'json-schema', () => {
 			name: 'user',
 			schema: {
 				id: datatypes.UUID( {
-					null: false
+					nullable: false
 				} ),
 				active: datatypes.boolean(),
 				email: datatypes.email(),
@@ -45,7 +45,7 @@ describe( 'json-schema', () => {
 				foo: {
 					bar: {
 						baz: datatypes.string( {
-							null: false
+							nullable: false
 						} )
 					}
 				}
@@ -62,17 +62,20 @@ describe( 'json-schema', () => {
 					type: 'string',
 					minLength: 36,
 					maxLength: 36,
-					example: '8bb846ee-a778-4378-9635-34b54956675d'
+					example: '8bb846ee-a778-4378-9635-34b54956675d',
+					nullable: false
 				},
 				active: {
 					type: 'boolean',
-					example: true
+					example: true,
+					nullable: true
 				},
 				email: {
 					type: 'string',
 					format: 'email',
 					minLength: 5,
-					example: 'you@domain.com'
+					example: 'you@domain.com',
+					nullable: true
 				},
 				state: {
 					type: 'string',
@@ -80,39 +83,47 @@ describe( 'json-schema', () => {
 						'pending',
 						'approved'
 					],
-					example: 'pending'
+					example: 'pending',
+					nullable: true
 				},
 				age: {
 					type: 'integer',
-					example: 11
+					example: 11,
+					nullable: true
 				},
 				created: {
 					type: 'string',
 					format: 'date-time',
-					example: '2020-10-21T03:53:01.873Z'
+					example: '2020-10-21T03:53:01.873Z',
+					nullable: true
 				},
 				meta: {
 					type: 'object',
 					example: { 
 						foo: 'bar'
-					}
+					},
+					nullable: true
 				},
 				weight: {
 					type: 'number',
-					example: 11.11
+					example: 11.11,
+					nullable: true
 				},
 				phone: {
 					type: 'string',
 					maxLength: 32,
-					example: '+12135555555'
+					example: '+12135555555',
+					nullable: true
 				},
 				quote: {
 					type: 'string',
-					example: 'this is my quote!'
+					example: 'this is my quote!',
+					nullable: true
 				},
 				description: {
 					type: 'string',
-					example: 'hello'
+					example: 'hello',
+					nullable: true
 				},
 				name: {
 					type: 'object',
@@ -120,12 +131,14 @@ describe( 'json-schema', () => {
 						first: {
 							type: 'string',
 							minLength: 2,
-							example: 'First'
+							example: 'First',
+							nullable: true
 						},
 						last: {
 							type: 'string',
 							minLength: 2,
-							example: 'Last'
+							example: 'Last',
+							nullable: true
 						}
 					},
 					required: []
@@ -138,7 +151,8 @@ describe( 'json-schema', () => {
 							properties: {
 								baz: {
 									type: 'string',
-									example: 'hello'
+									example: 'hello',
+									nullable: false
 								}
 							},
 							required: [ 'baz' ]

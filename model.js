@@ -1,10 +1,10 @@
 'use strict';
 
-const extend = require( 'extend' );
+const deepmerge = require( 'deepmerge' );
 const traverse = require( 'traverse' );
 
-module.exports = ( _options ) => {
-	const options = extend( true, {}, _options );
+module.exports = ( _options = {} ) => {
+	const options = deepmerge( {}, _options );
 
 	if ( !options.name ) {
 		throw new Error( 'You must specify a name to create a model.' );
@@ -17,7 +17,7 @@ module.exports = ( _options ) => {
 	return {
 		options,
 
-		create: ( _object ) => {
+		create: ( _object = {} ) => {
 			const initial_object = traverse( options.schema ).map( function( value ) {
 				if ( typeof value === 'object' && value.datatype ) {
 					if ( typeof value.initial === 'function' ) {
@@ -35,7 +35,7 @@ module.exports = ( _options ) => {
 				this.update( value );
 			} );
 
-			const object = extend( true, {}, initial_object, _object );
+			const object = deepmerge( initial_object, _object );
 			return object;
 		},
 
