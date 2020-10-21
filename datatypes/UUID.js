@@ -11,7 +11,8 @@ module.exports = ( _options ) => {
 	const options = extend( true, {
 		null: true,
 		unique: false,
-		initial: undefined
+		initial: undefined,
+		example: '8bb846ee-a778-4378-9635-34b54956675d'
 	}, _options );
 
 	return {

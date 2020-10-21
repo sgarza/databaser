@@ -6,7 +6,8 @@ module.exports = ( _options ) => {
 	const options = extend( true, {
 		null: true,
 		initial: undefined,
-		validate: undefined
+		validate: undefined,
+		example: true
 	}, _options );
 
 	return {

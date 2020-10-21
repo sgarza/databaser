@@ -7,7 +7,8 @@ const ISO_DATE_REGEX = /(\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\d\.\d+([+-][
 module.exports = ( _options ) => {
 	const options = extend( true, {
 		null: true,
-		initial: undefined
+		initial: undefined,
+		example: '2020-10-21T03:53:01.873Z'
 	}, _options );
 
 	return {

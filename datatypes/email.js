@@ -11,7 +11,8 @@ module.exports = ( _options ) => {
 			max: undefined
 		},
 		unique: false,
-		initial: undefined
+		initial: undefined,
+		example: 'you@domain.com'
 	}, _options );
 
 	const base_type = string( options );

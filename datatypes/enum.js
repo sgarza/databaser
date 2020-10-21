@@ -7,7 +7,8 @@ module.exports = ( _options ) => {
 		null: true,
 		initial: undefined,
 		values: [],
-		validate: undefined
+		validate: undefined,
+		example: undefined
 	}, _options );
 
 	return {

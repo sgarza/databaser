@@ -5,38 +5,47 @@ const traverse = require( 'traverse' );
 // String values MUST be one of the six primitive types ("null", "boolean", "object", "array", "number", or "string"), or "integer" which matches any number with a zero fractional part. 
 
 const DATATYPE_MAP = {
-	boolean: () => ( {
-		type: 'boolean'
+	boolean: ( field ) => ( {
+		type: 'boolean',
+		example: field.options.example
 	} ),
 	email: ( field ) => ( {
 		type: 'string',
 		format: 'email',
-		minLength: field.options.length.min
+		minLength: field.options.length.min,
+		example: field.options.example
 	} ),
 	enum: ( field ) => ( {
 		type: 'string',
-		enum: field.options.values
+		enum: field.options.values,
+		example: field.options.example
 	} ),
-	integer: () => ( {
-		type: 'integer'
+	integer: ( field ) => ( {
+		type: 'integer',
+		example: field.options.example
 	} ),
-	ISODate: () => ( {
+	ISODate: ( field ) => ( {
 		type: 'string',
-		format: 'date-time'
+		format: 'date-time',
+		example: field.options.example
 	} ),
-	JSON: () => ( {
-		type: 'string'
+	JSON: ( field ) => ( {
+		type: 'string',
+		example: field.options.example
 	} ),
-	number: () => ( {
-		type: 'number'
+	number: ( field ) => ( {
+		type: 'number',
+		example: field.options.example
 	} ),
 	phone: ( field ) => ( {
 		type: 'string',
-		maxLength: field.options.length.max
+		maxLength: field.options.length.max,
+		example: field.options.example
 	} ),
 	string: ( field ) => {
 		const schema = {
-			type: 'string'
+			type: 'string',
+			example: field.options.example
 		};
 
 		if ( typeof field.options.length.min === 'number' ) {
@@ -49,11 +58,12 @@ const DATATYPE_MAP = {
 
 		return schema;
 	},
-	UUID: () => ( {
+	UUID: ( field ) => ( {
 		type: 'string',
 		format: 'uuid',
 		minLength: 36,
-		maxLength: 36
+		maxLength: 36,
+		example: field.options.example
 	} )
 };
 

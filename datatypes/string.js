@@ -11,7 +11,8 @@ module.exports = ( _options ) => {
 		},
 		unique: false,
 		initial: undefined,
-		validate: undefined
+		validate: undefined,
+		example: 'hello'
 	}, _options );
 
 	return {

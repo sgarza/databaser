@@ -11,7 +11,8 @@ module.exports = ( _options ) => {
 			max: undefined
 		},
 		initial: undefined,
-		validate: undefined
+		validate: undefined,
+		example: 11
 	}, _options );
 
 	return {

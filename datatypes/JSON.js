@@ -5,7 +5,8 @@ const extend = require( 'extend' );
 module.exports = ( _options ) => {
 	const options = extend( true, {
 		null: true,
-		initial: undefined
+		initial: undefined,
+		example: '{ "foo": "bar" }'
 	}, _options );
 
 	return {

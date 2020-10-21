@@ -16,23 +16,30 @@ describe( 'json-schema', () => {
 					values: [
 						'pending',
 						'approved'
-					]
+					],
+					example: 'pending'
 				} ),
 				age: datatypes.integer(),
 				created: datatypes.ISODate(),
 				meta: datatypes.JSON(),
 				weight: datatypes.number(),
 				phone: datatypes.phone(),
+				quote: datatypes.string( {
+					example: 'this is my quote!'
+				} ),
+				description: datatypes.string(),
 				name: {
 					first: datatypes.string( {
 						length: {
 							min: 2
-						}
+						},
+						example: 'First'
 					} ),
 					last: datatypes.string( {
 						length: {
 							min: 2
-						}
+						},
+						example: 'Last'
 					} )
 				},
 				foo: {
@@ -54,51 +61,69 @@ describe( 'json-schema', () => {
 				id: {
 					type: 'string',
 					minLength: 36,
-					maxLength: 36
+					maxLength: 36,
+					example: '8bb846ee-a778-4378-9635-34b54956675d'
 				},
 				active: {
-					type: 'boolean'
+					type: 'boolean',
+					example: true
 				},
 				email: {
 					type: 'string',
 					format: 'email',
-					minLength: 5
+					minLength: 5,
+					example: 'you@domain.com'
 				},
 				state: {
 					type: 'string',
 					enum: [
 						'pending',
 						'approved'
-					]
+					],
+					example: 'pending'
 				},
 				age: {
-					type: 'integer'
+					type: 'integer',
+					example: 11
 				},
 				created: {
 					type: 'string',
-					format: 'date-time'
+					format: 'date-time',
+					example: '2020-10-21T03:53:01.873Z'
 				},
 				meta: {
-					type: 'string'
+					type: 'string',
+					example: '{ "foo": "bar" }'
 				},
 				weight: {
-					type: 'number'
+					type: 'number',
+					example: 11.11
 				},
 				phone: {
 					type: 'string',
-					format: 'phone',
-					maxLength: 32
+					maxLength: 32,
+					example: '+12135555555'
+				},
+				quote: {
+					type: 'string',
+					example: 'this is my quote!'
+				},
+				description: {
+					type: 'string',
+					example: 'hello'
 				},
 				name: {
 					type: 'object',
 					properties: {
 						first: {
 							type: 'string',
-							minLength: 2
+							minLength: 2,
+							example: 'First'
 						},
 						last: {
 							type: 'string',
-							minLength: 2
+							minLength: 2,
+							example: 'Last'
 						}
 					},
 					required: []
@@ -110,7 +135,8 @@ describe( 'json-schema', () => {
 							type: 'object',
 							properties: {
 								baz: {
-									type: 'string'
+									type: 'string',
+									example: 'hello'
 								}
 							},
 							required: [ 'baz' ]

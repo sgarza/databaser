@@ -13,7 +13,8 @@ module.exports = ( _options ) => {
 			max: 32
 		},
 		unique: false,
-		initial: undefined
+		initial: undefined,
+		example: '+12135555555'
 	}, _options );
 
 	const base_type = string( options );
