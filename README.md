@@ -5,7 +5,12 @@
 ```javascript
 'use strict';
 
-const { model, databases, datatypes } = require( 'databaser' );
+const {
+	as_json_schema,
+	databases,
+	datatypes,
+	model
+} = require( 'databaser' );
 
 const User = model( {
 	name: 'user',
@@ -98,5 +103,8 @@ const User = model( {
 
 	await users_db.del( user.id );
 	console.log( 'Deleted user from db.' );
+
+	// we can convert to a json schema, as well
+	console.dir( as_json_schema( User ) );
 } )();
 ```

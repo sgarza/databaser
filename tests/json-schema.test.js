@@ -28,6 +28,10 @@ describe( 'json-schema', () => {
 					example: 'this is my quote!'
 				} ),
 				description: datatypes.string(),
+				array: datatypes.JSON( {
+					type: 'array',
+					example: [ 1, 2, 3 ]
+				} ),
 				name: {
 					first: datatypes.string( {
 						length: {
@@ -124,6 +128,11 @@ describe( 'json-schema', () => {
 					type: 'string',
 					example: 'hello',
 					nullable: true
+				},
+				array: {
+					type: 'array',
+					nullable: true,
+					example: [ 1, 2, 3 ]
 				},
 				name: {
 					type: 'object',

@@ -35,7 +35,7 @@ const DATATYPE_MAP = {
 		nullable: field.options.nullable
 	} ),
 	JSON: ( field ) => ( {
-		type: 'object',
+		type: field.options.type ?? 'object',
 		example: field.options.example,
 		nullable: field.options.nullable
 	} ),
