@@ -60,6 +60,7 @@ describe( 'json-schema', () => {
 
 		expect( json_schema ).toMatchObject( {
 			type: 'object',
+			description: 'user',
 			required: [ 'id' ],
 			properties: {
 				id: {

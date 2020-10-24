@@ -131,5 +131,8 @@ module.exports = ( model ) => {
 			this.remove();
 		}
 	} );
+
+	schema.description = model.options.name;
+
 	return schema;
 };
