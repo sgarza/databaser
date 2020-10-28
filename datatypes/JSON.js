@@ -9,7 +9,13 @@ module.exports = ( _options = {} ) => {
 		example: {
 			foo: 'bar'
 		}
-	}, _options );
+	}, _options, {
+		customMerge: ( key ) => {
+			if ( key === 'example' ) {
+				return ( source, dest ) => ( dest ?? source );
+			}
+		}
+	} );
 
 	return {
 		datatype: 'JSON',

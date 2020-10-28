@@ -22,6 +22,11 @@ describe( 'json-schema', () => {
 				age: datatypes.integer(),
 				created: datatypes.ISODate(),
 				meta: datatypes.JSON(),
+				with_example: datatypes.JSON( {
+					example: {
+						blah: true
+					}
+				} ),
 				weight: datatypes.number(),
 				phone: datatypes.phone(),
 				quote: datatypes.string( {
@@ -106,6 +111,14 @@ describe( 'json-schema', () => {
 					type: 'object',
 					example: { 
 						foo: 'bar'
+					},
+					nullable: true,
+					additionalProperties: true
+				},
+				with_example: {
+					type: 'object',
+					example: { 
+						blah: true
 					},
 					nullable: true,
 					additionalProperties: true
