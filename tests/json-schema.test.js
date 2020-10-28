@@ -107,7 +107,8 @@ describe( 'json-schema', () => {
 					example: { 
 						foo: 'bar'
 					},
-					nullable: true
+					nullable: true,
+					additionalProperties: true
 				},
 				weight: {
 					type: 'number',
@@ -133,7 +134,8 @@ describe( 'json-schema', () => {
 				array: {
 					type: 'array',
 					nullable: true,
-					example: [ 1, 2, 3 ]
+					example: [ 1, 2, 3 ],
+					additionalProperties: true
 				},
 				name: {
 					type: 'object',
