@@ -525,6 +525,26 @@ module.exports = {
 					await pool.end();
 					this._pool.connected = false;
 				}
+			},
+
+			try_lock: async function( id ) {
+				const pool = await this._pool.get();
+				const result = await pool.query( 'SELECT pg_try_advisory_lock( $1 )', [ id ] );
+				const row = result?.rows?.[ 0 ] ?? {
+					pg_try_advisory_lock: false
+				};
+
+				return row.pg_try_advisory_lock;
+			},
+
+			unlock: async function( id ) {
+				const pool = await this._pool.get();
+				const result = await pool.query( 'SELECT pg_advisory_unlock( $1 )', [ id ] );
+				const row = result?.rows?.[ 0 ] ?? {
+					pg_advisory_unlock: false
+				};
+
+				return row.pg_advisory_unlock;
 			}
 		};
 
