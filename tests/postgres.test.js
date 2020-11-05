@@ -1151,4 +1151,58 @@ describe( 'postgres', () => {
 		await tests.close();
 		await other_tests_connection.close();
 	} );
+
+	it( 'should allow locking with two lock arguments', async () => {
+		const TestModel = model( {
+			name: 'lock_second_argument_test',
+			schema: {
+				id: datatypes.UUID( {
+					nullable: false,
+					unique: true,
+					primary: true
+				} ),
+				value: datatypes.number()
+			}
+		} );
+
+		const tests = await databases.postgres.get( TestModel, {
+			db,
+			table: 'locking_second_argument_test'
+		} );
+
+		const locked = await tests.try_lock( 1, 2 );
+
+		expect( locked ).toEqual( true );
+
+		const other_tests_connection = await databases.postgres.get( TestModel, {
+			db,
+			table: 'locking_second_argument_test'
+		} );
+
+		const second_lock = await other_tests_connection.try_lock( 1, 2 );
+
+		expect( second_lock ).toEqual( false );
+
+		const unlocked = await tests.unlock( 1, 2 );
+
+		expect( unlocked ).toEqual( true );
+
+		const third_lock = await other_tests_connection.try_lock( 1, 2 );
+
+		expect( third_lock ).toEqual( true );
+
+		const fourth_lock = await tests.try_lock( 1, 2 );
+
+		expect( fourth_lock ).toEqual( false );
+
+		const third_lock_unlocked = await other_tests_connection.unlock( 1, 2 );
+
+		expect( third_lock_unlocked ).toEqual( true );
+
+		await expect( async () => { await tests.try_lock( 1, 2, 3 ); } ).rejects.toThrow( 'invalid number of arguments to try_lock()' );
+		expect( async () => { await tests.unlock( 1, 2, 3 ); } ).rejects.toThrow( 'invalid number of arguments to unlock()' );
+
+		await tests.close();
+		await other_tests_connection.close();
+	} );
 } );

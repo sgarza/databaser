@@ -538,24 +538,52 @@ module.exports = {
 				}
 			},
 
-			try_lock: async function( id ) {
+			try_lock: async function() {
 				const pool = await this._pool.get();
-				const result = await pool.query( 'SELECT pg_try_advisory_lock( $1 )', [ id ] );
-				const row = result?.rows?.[ 0 ] ?? {
-					pg_try_advisory_lock: false
-				};
 
-				return row.pg_try_advisory_lock;
+				if ( arguments.length === 1 ) {
+					const result = await pool.query( 'SELECT pg_try_advisory_lock( $1 )', [ ...arguments ] );
+					const row = result?.rows?.[ 0 ] ?? {
+						pg_try_advisory_lock: false
+					};
+	
+					return row.pg_try_advisory_lock;
+				}
+				else if ( arguments.length === 2 ) {
+					const result = await pool.query( 'SELECT pg_try_advisory_lock( $1, $2 )', [ ...arguments ] );
+					const row = result?.rows?.[ 0 ] ?? {
+						pg_try_advisory_lock: false
+					};
+	
+					return row.pg_try_advisory_lock;
+				}
+				else {
+					throw new Error( 'invalid number of arguments to try_lock()' );
+				}
 			},
 
-			unlock: async function( id ) {
+			unlock: async function() {
 				const pool = await this._pool.get();
-				const result = await pool.query( 'SELECT pg_advisory_unlock( $1 )', [ id ] );
-				const row = result?.rows?.[ 0 ] ?? {
-					pg_advisory_unlock: false
-				};
 
-				return row.pg_advisory_unlock;
+				if ( arguments.length === 1 ) {
+					const result = await pool.query( 'SELECT pg_advisory_unlock( $1 )', [ ...arguments ] );
+					const row = result?.rows?.[ 0 ] ?? {
+						pg_advisory_unlock: false
+					};
+	
+					return row.pg_advisory_unlock;
+				}
+				else if ( arguments.length === 2 ) {
+					const result = await pool.query( 'SELECT pg_advisory_unlock( $1, $2 )', [ ...arguments ] );
+					const row = result?.rows?.[ 0 ] ?? {
+						pg_advisory_unlock: false
+					};
+	
+					return row.pg_advisory_unlock;
+				}
+				else {
+					throw new Error( 'invalid number of arguments to unlock()' );
+				}
 			}
 		};
 
