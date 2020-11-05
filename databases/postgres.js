@@ -61,18 +61,18 @@ const DATATYPE_MAP = {
 		const RANGES = {
 			'SMALLINT': [ -32768, 32767 ],
 			'INTEGER': [ -2147483648, 2147483647 ],
-			'BIGINT': [ -9223372036854775808, 9223372036854775807 ]
+			'BIGINT': [ -9223372036854775808n, 9223372036854775807n ]
 		};
 
 		let storage_type = 'INTEGER';
 
-		if ( typeof field.options.range.min === 'number' || typeof field.options.range.max === 'number' ) {
+		if ( typeof field.options.range.min !== 'undefined' || typeof field.options.range.max !== 'undefined' ) {
 			for ( const type of Object.keys( RANGES ) ) {
 				const range = RANGES[ type ];
-				if ( typeof field.options.range.min === 'number' && field.options.range.min < range[ 0 ] ) {
+				if ( typeof field.options.range.min !== 'undefined' && field.options.range.min < range[ 0 ] ) {
 					continue;
 				}
-				else if ( typeof field.options.range.max === 'number' && field.options.range.max > range[ 1 ] ) {
+				else if ( typeof field.options.range.max !== 'undefined' && field.options.range.max > range[ 1 ] ) {
 					continue;
 				}
 				else {
@@ -105,6 +105,17 @@ const DATATYPE_SERIALIZERS = {
 };
 
 const DATATYPE_DESERIALIZERS = {
+	integer: ( value, field ) => {
+		const storage_type = DATATYPE_MAP.integer( field );
+
+		if ( storage_type === 'BIGINT' ) {
+			return BigInt( value );
+		}
+		else {
+			return typeof value === 'string' ? Number( value ) : value;
+		}
+	},
+
 	ISODate: ( value ) => ( value ? new Date( value ).toISOString() : value ),
 
 	// no need for JSON deserializer, postgres automatically deserializes
@@ -277,7 +288,7 @@ module.exports = {
 						const key = options.column_name( path );
 						const value = object_traverser.get( path );
 						const serializer = options.serializers[ key ] || DATATYPE_SERIALIZERS[ field.datatype ];
-						const serialized_value = serializer ? await serializer( value ) : value;
+						const serialized_value = serializer ? await serializer( value, field ) : value;
 						serialized_traverser.set( [ key ], serialized_value );
 					}
 				}
@@ -303,7 +314,7 @@ module.exports = {
 						const key = options.column_name( path );
 						const value = object_traverser.get( [ key ] );
 						const deserializer = options.deserializers[ key ] || DATATYPE_DESERIALIZERS[ field.datatype ];
-						const deserialized_value = deserializer ? await deserializer( value ) : value;
+						const deserialized_value = deserializer ? await deserializer( value, field ) : value;
 						deserialized_traverser.set( path, deserialized_value );
 					}
 				}

@@ -33,11 +33,11 @@ module.exports = ( _options = {} ) => {
 				return;
 			}
 
-			if ( typeof value !== 'number' ) {
+			if ( !( typeof value === 'number' || typeof value === 'bigint' ) ) {
 				return 'invalid type';
 			}
 
-			if ( !Number.isInteger( value ) ) {
+			if ( !( Number.isInteger( value ) || typeof value === 'bigint' ) ) {
 				return 'invalid value';
 			}
 

@@ -611,8 +611,8 @@ describe( 'postgres', () => {
 				} ),
 				val: datatypes.integer( {
 					range: {
-						min: -10000000000,
-						max: 10000000000
+						min: -100000000000000n,
+						max: 100000000000000n
 					}
 				} )
 			}
@@ -645,6 +645,139 @@ describe( 'postgres', () => {
 
 		const unspecified_table_create_sql = unspecifieds._create_table_sql();
 		expect( unspecified_table_create_sql ).toMatch( 'val INTEGER' );
+	} );
+
+	it( 'should serialize/deserialize integers properly', async () => {
+		const Smallint = model( {
+			name: 'smallint_serialization_test',
+			schema: {
+				id: datatypes.UUID( {
+					nullable: false,
+					unique: true,
+					primary: true
+				} ),
+				val: datatypes.integer( {
+					range: {
+						min: -1000,
+						max: 1000
+					}
+				} )
+			}
+		} );
+
+		const smallints = await databases.postgres.get( Smallint, {
+			db,
+			table: 'smallint_serialization_test_store'
+		} );
+
+		const smallint = Smallint.create( {
+			val: 123
+		} );
+
+		await smallints.put( smallint );
+
+		const stored_smallint = await smallints.get( smallint.id );
+
+		await smallints.close();
+
+		expect( stored_smallint.val ).toEqual( 123 );
+
+		const Integer = model( {
+			name: 'integer_serialization_test',
+			schema: {
+				id: datatypes.UUID( {
+					nullable: false,
+					unique: true,
+					primary: true
+				} ),
+				val: datatypes.integer( {
+					range: {
+						min: -100000,
+						max: 100000
+					}
+				} )
+			}
+		} );
+
+		const integers = await databases.postgres.get( Integer, {
+			db,
+			table: 'integer_serialization_test_store'
+		} );
+
+		const integer = Integer.create( {
+			val: 10123
+		} );
+
+		await integers.put( integer );
+
+		const stored_integer = await integers.get( integer.id );
+
+		await integers.close();
+
+		expect( stored_integer.val ).toEqual( 10123 );
+
+		const Bigint = model( {
+			name: 'bigint_serialization_test',
+			schema: {
+				id: datatypes.UUID( {
+					nullable: false,
+					unique: true,
+					primary: true
+				} ),
+				val: datatypes.integer( {
+					range: {
+						min: -100000000000000n,
+						max: 100000000000000n
+					}
+				} )
+			}
+		} );
+
+		const bigints = await databases.postgres.get( Bigint, {
+			db,
+			table: 'bigint_serialization_test_store'
+		} );
+
+		const bigint = Bigint.create( {
+			val: -90000000000123n
+		} );
+
+		await bigints.put( bigint );
+
+		const stored_bigint = await bigints.get( bigint.id );
+
+		await bigints.close();
+
+		expect( stored_bigint.val ).toEqual( -90000000000123n );
+
+		const Unspecified = model( {
+			name: 'unspecified_range_serialization_test',
+			schema: {
+				id: datatypes.UUID( {
+					nullable: false,
+					unique: true,
+					primary: true
+				} ),
+				val: datatypes.integer()
+			}
+		} );
+
+		const unspecifieds = await databases.postgres.get( Unspecified, {
+			db,
+			table: 'unspecified_serialization_test_store'
+		} );
+
+		const unspecified = Unspecified.create( {
+			val: 123123123
+		} );
+
+		await unspecifieds.put( unspecified );
+
+		const stored_unspecified = await unspecifieds.get( unspecified.id );
+
+		await unspecifieds.close();
+
+		expect( stored_unspecified.val ).toEqual( 123123123 );
 	} );
 
 	it( 'should serialize/deserialize a JSON object properly', async () => {
