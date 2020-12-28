@@ -9,16 +9,16 @@
   "author": "Andy Burke <andy.burke@mailbox.earth>",
   "license": "MIT",
   "devDependencies": {
-    "eslint": "^7.12.1",
+    "eslint": "^7.16.0",
     "jest": "^26.6.3",
     "jest-circus": "^26.6.3"
   },
   "dependencies": {
     "date-fns": "^2.16.1",
     "deepmerge": "^4.2.2",
-    "pg": "^8.4.2",
+    "pg": "^8.5.1",
     "pluralize": "^8.0.0",
     "traverse": "^0.6.6",
-    "uuid": "^8.3.1"
+    "uuid": "^8.3.2"
   }
 }
