@@ -1,9 +1,12 @@
 'use strict';
 
+const assert = require( 'assert' );
 const { datatypes, model, as_json_schema } = require( '../index.js' );
 
-describe( 'json-schema', () => {
-	it( 'should allow converting a model to a JSON Schema', () => {
+module.exports = async ( plaintest ) => {
+	const group = plaintest.group( 'json-schema' );
+
+	group.test( 'should allow converting a model to a JSON Schema', () => {
 		const user_model = model( {
 			name: 'user',
 			schema: {
@@ -63,7 +66,7 @@ describe( 'json-schema', () => {
 		
 		const json_schema = as_json_schema( user_model );
 
-		expect( json_schema ).toMatchObject( {
+		assert.deepStrictEqual( json_schema, {
 			type: 'object',
 			description: 'user',
 			required: [ 'id' ],
@@ -73,6 +76,7 @@ describe( 'json-schema', () => {
 					minLength: 36,
 					maxLength: 36,
 					example: '8bb846ee-a778-4378-9635-34b54956675d',
+					format: 'uuid',
 					nullable: false
 				},
 				active: {
@@ -188,4 +192,4 @@ describe( 'json-schema', () => {
 			}
 		} );
 	} );
-} );
+};

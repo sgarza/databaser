@@ -8,12 +8,13 @@ const PHONE_REGEX = /^\+(?:[0-9]){6,14}[0-9]$/;
 module.exports = ( _options = {} ) => {
 	const options = deepmerge( {
 		nullable: true,
+		unique: false,
+		initial: undefined,
+		validate: undefined,
 		length: {
 			min: undefined,
 			max: 32
 		},
-		unique: false,
-		initial: undefined,
 		example: '+12135555555'
 	}, _options );
 
@@ -35,7 +36,16 @@ module.exports = ( _options = {} ) => {
 				return error;
 			}
 
-			return value !== null && !PHONE_REGEX.test( value ) ? 'invalid value format' : undefined;
+			if ( !PHONE_REGEX.test( value ) ) {
+				return 'invalid value format';
+			}
+
+			if ( typeof options.validate === 'function' ) {
+				const error = options.validate( value );
+				if ( error ) {
+					return error;
+				}
+			}
 		}
 	};
 };

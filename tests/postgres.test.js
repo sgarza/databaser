@@ -1,3 +1,6 @@
+'use strict';
+
+const assert = require( 'assert' );
 const child_process = require( 'child_process' );
 const { datatypes, model, databases } = require( '../index.js' );
 
@@ -8,11 +11,12 @@ const db = {
 	password: 'postgres'
 };
 
-const POSTGRES_VERSION = '10';
+const POSTGRES_VERSION = '12';
 
-describe( 'postgres', () => {
+module.exports = async ( plaintest ) => {
+	const group = plaintest.group( 'postgres' );
 
-	beforeAll( async () => {
+	group.before.all.push( async () => {
 		child_process.execSync( 'docker -v' ); // throws if no docker installed
 
 		try {
@@ -40,13 +44,13 @@ describe( 'postgres', () => {
 		do {
 			postgres_listening = child_process.execSync( 'docker inspect --format "{{json .State.Health.Status }}" databaser-test-postgres' ).toString().trim().match( /healthy/i );
 		} while( !postgres_listening );
-	}, 60 * 1000 ); // 60 seconds to set up docker container
+	} );
 
-	afterAll( async () => {
+	group.after.all.push( async () => {
 		child_process.execSync( 'docker rm --force --volumes databaser-test-postgres' );
 	} );
 
-	it( 'should wait for postgres to be ready', async () => {
+	group.test( 'should wait for postgres to be ready', async () => {
 		const Simple = model( {
 			name: 'simple',
 			schema: {
@@ -68,12 +72,12 @@ describe( 'postgres', () => {
 
 		const stored = await simples.get( simple.id );
 
-		expect( stored ).toEqual( simple );
+		assert.deepStrictEqual( stored, simple );
 
 		await simples.close();
 	} );
 
-	it( 'should handle objects with only a primary key', async () => {
+	group.test( 'should handle objects with only a primary key', async () => {
 		const PrimaryOnly = model( {
 			name: 'primaryonly',
 			schema: {
@@ -95,12 +99,12 @@ describe( 'postgres', () => {
 
 		const stored = await primary_onlys.get( primary_only.id );
 
-		expect( stored ).toEqual( primary_only );
+		assert.deepStrictEqual( stored, primary_only );
 
 		await primary_onlys.close();
 	} );
 
-	it( 'should have a connected getter', async () => {
+	group.test( 'should have a connected getter', async () => {
 		const Foo = model( {
 			name: 'foo',
 			schema: {
@@ -117,20 +121,20 @@ describe( 'postgres', () => {
 			table: 'connected_test'
 		} );
 
-		expect( foos ).toHaveProperty( 'connected', false );
+		assert.strictEqual( foos?.connected, false );
 
 		const foo = Foo.create( {} );
 
 		await foos.put( foo );
 
-		expect( foos ).toHaveProperty( 'connected', true );
+		assert.strictEqual( foos?.connected, true );
 
 		await foos.close();
 
-		expect( foos ).toHaveProperty( 'connected', false );
+		assert.strictEqual( foos?.connected, false );
 	} );
 
-	it( 'should connect on calling open() and disconnect on close()', async () => {
+	group.test( 'should connect on calling open() and disconnect on close()', async () => {
 		const Model = model( {
 			name: 'testmodel',
 			schema: {
@@ -147,18 +151,18 @@ describe( 'postgres', () => {
 			table: 'open_test'
 		} );
 
-		expect( instances ).toHaveProperty( 'connected', false );
+		assert.strictEqual( instances.connected, false );
 
 		await instances.open();
 
-		expect( instances ).toHaveProperty( 'connected', true );
+		assert.strictEqual( instances.connected, true );
 
 		await instances.close();
 
-		expect( instances ).toHaveProperty( 'connected', false );
+		assert.strictEqual( instances.connected, false );
 	} );
 
-	it( 'should store a model instance', async () => {
+	group.test( 'should store a model instance', async () => {
 		const User = model( {
 			name: 'user',
 			schema: {
@@ -186,12 +190,12 @@ describe( 'postgres', () => {
 
 		const stored_user = await users.get( user.id );
 
-		expect( stored_user ).toEqual( user );
+		assert.deepStrictEqual( stored_user, user );
 
 		await users.close();
 	} );
 
-	it( 'should find a model instance', async () => {
+	group.test( 'should find a model instance', async () => {
 		const User = model( {
 			name: 'user',
 			schema: {
@@ -221,14 +225,14 @@ describe( 'postgres', () => {
 			email: 'find@domain.com'
 		} );
 
-		expect( Array.isArray( stored_users ) ).toBe( true );
-		expect( Array.isArray( stored_users ) && stored_users.length ).toBe( 1 );
-		expect( Array.isArray( stored_users ) && stored_users.length && stored_users[ 0 ] ).toEqual( user );
+		assert.strictEqual( Array.isArray( stored_users ), true );
+		assert.strictEqual( Array.isArray( stored_users ) && stored_users.length, 1 );
+		assert.deepStrictEqual( Array.isArray( stored_users ) && stored_users.length && stored_users[ 0 ], user );
 
 		await users.close();
 	} );
 
-	it( 'should find a model instance with multiple options for a value (SQL OR clause)', async () => {
+	group.test( 'should find a model instance with multiple options for a value (SQL OR clause)', async () => {
 		const User = model( {
 			name: 'user',
 			schema: {
@@ -262,14 +266,14 @@ describe( 'postgres', () => {
 			]
 		} );
 
-		expect( Array.isArray( stored_users ) ).toBe( true );
-		expect( Array.isArray( stored_users ) && stored_users.length ).toBe( 1 );
-		expect( Array.isArray( stored_users ) && stored_users.length && stored_users[ 0 ] ).toEqual( user );
+		assert.strictEqual( Array.isArray( stored_users ), true );
+		assert.strictEqual( Array.isArray( stored_users ) && stored_users.length, 1 );
+		assert.deepStrictEqual( Array.isArray( stored_users ) && stored_users.length && stored_users[ 0 ], user );
 
 		await users.close();
 	} );
 
-	it( 'should find a model instance with advanced query on a value', async () => {
+	group.test( 'should find a model instance with advanced query on a value', async () => {
 		const Count = model( {
 			name: 'count',
 			schema: {
@@ -306,9 +310,9 @@ describe( 'postgres', () => {
 			}
 		} );
 
-		expect( Array.isArray( matching_counts_with_and ) ).toBe( true );
-		expect( Array.isArray( matching_counts_with_and ) && matching_counts_with_and.length ).toBe( 5 ); // 3, 4, 5, 6, 7
-		expect( Array.isArray( matching_counts_with_and ) && matching_counts_with_and.map( ( _count ) => ( _count.count ) ).sort() ).toEqual( [ 3, 4, 5, 6, 7 ] );
+		assert.strictEqual( Array.isArray( matching_counts_with_and ), true );
+		assert.strictEqual( Array.isArray( matching_counts_with_and ) && matching_counts_with_and.length, 5 ); // 3, 4, 5, 6, 7
+		assert.deepStrictEqual( Array.isArray( matching_counts_with_and ) && matching_counts_with_and.map( ( _count ) => ( _count.count ) ).sort(), [ 3, 4, 5, 6, 7 ] );
 
 		const matching_counts_with_or = await counts.find( {
 			count: {
@@ -322,14 +326,14 @@ describe( 'postgres', () => {
 			}
 		} );
 
-		expect( Array.isArray( matching_counts_with_or ) ).toBe( true );
-		expect( Array.isArray( matching_counts_with_or ) && matching_counts_with_or.length ).toBe( 3 ); // 0, 1, 9
-		expect( Array.isArray( matching_counts_with_or ) && matching_counts_with_or.map( ( _count ) => ( _count.count ) ).sort() ).toEqual( [ 0, 1, 9 ] );
+		assert.strictEqual( Array.isArray( matching_counts_with_or ), true );
+		assert.strictEqual( Array.isArray( matching_counts_with_or ) && matching_counts_with_or.length, 3 ); // 0, 1, 9
+		assert.deepStrictEqual( Array.isArray( matching_counts_with_or ) && matching_counts_with_or.map( ( _count ) => ( _count.count ) ).sort(), [ 0, 1, 9 ] );
 
 		await counts.close();
 	} );
 
-	it( 'should sort multiple results properly', async () => {
+	group.test( 'should sort multiple results properly', async () => {
 		const User = model( {
 			name: 'user',
 			schema: {
@@ -378,16 +382,16 @@ describe( 'postgres', () => {
 			}
 		} );
 
-		expect( Array.isArray( descending_found_users ) ).toBe( true );
-		expect( Array.isArray( ascending_found_users ) ).toBe( true );
+		assert.strictEqual( Array.isArray( descending_found_users ), true );
+		assert.strictEqual( Array.isArray( ascending_found_users ), true );
 
-		expect( descending_found_users ).toEqual( descending_created_users );
-		expect( ascending_found_users ).toEqual( ascending_created_users );
+		assert.deepStrictEqual( descending_found_users, descending_created_users );
+		assert.deepStrictEqual( ascending_found_users, ascending_created_users );
 
 		await users.close();
 	} );
 
-	it( 'should support paths for ordering column', async () => {
+	group.test( 'should support paths for ordering column', async () => {
 		const User = model( {
 			name: 'user',
 			schema: {
@@ -438,16 +442,16 @@ describe( 'postgres', () => {
 			}
 		} );
 
-		expect( Array.isArray( descending_found_users ) ).toBe( true );
-		expect( Array.isArray( ascending_found_users ) ).toBe( true );
+		assert.strictEqual( Array.isArray( descending_found_users ), true );
+		assert.strictEqual( Array.isArray( ascending_found_users ), true );
 
-		expect( descending_found_users ).toEqual( descending_created_users );
-		expect( ascending_found_users ).toEqual( ascending_created_users );
+		assert.deepStrictEqual( descending_found_users, descending_created_users );
+		assert.deepStrictEqual( ascending_found_users, ascending_created_users );
 
 		await users.close();
 	} );
 
-	it( 'should delete a model instance', async () => {
+	group.test( 'should delete a model instance', async () => {
 		const User = model( {
 			name: 'user',
 			schema: {
@@ -475,18 +479,18 @@ describe( 'postgres', () => {
 
 		const stored_user = await users.get( user.id );
 
-		expect( stored_user ).toEqual( user );
+		assert.deepStrictEqual( stored_user, user );
 
 		await users.del( user.id );
 
 		const deleted_user = await users.get( user.id );
 
-		expect( deleted_user ).toEqual( undefined );
+		assert.strictEqual( deleted_user, undefined );
 
 		await users.close();
 	} );
 
-	it( 'should serialize/deserialize an ISODate properly', async () => {
+	group.test( 'should serialize/deserialize an ISODate properly', async () => {
 		const User = model( {
 			name: 'user',
 			schema: {
@@ -510,12 +514,12 @@ describe( 'postgres', () => {
 
 		const stored_user = await users.get( user.id );
 
-		expect( stored_user ).toEqual( user );
+		assert.deepStrictEqual( stored_user, user );
 
 		await users.close();
 	} );
 
-	it( 'should serialize/deserialize an ISODate in UTC properly', async () => {
+	group.test( 'should serialize/deserialize an ISODate in UTC properly', async () => {
 
 		const PREV_TZ = process.env.TZ;
 		process.env.TZ = 'utc';
@@ -543,14 +547,14 @@ describe( 'postgres', () => {
 
 		const stored_user = await users.get( user.id );
 
-		expect( stored_user ).toEqual( user );
+		assert.deepStrictEqual( stored_user, user );
 
 		await users.close();
 
 		process.env.TZ = PREV_TZ;
 	} );
 
-	it( 'should determine integer types properly', async () => {
+	group.test( 'should determine integer types properly', async () => {
 		const Smallint = model( {
 			name: 'smallint_test',
 			schema: {
@@ -574,7 +578,7 @@ describe( 'postgres', () => {
 		} );
 
 		const smallint_table_create_sql = smallints._create_table_sql();
-		expect( smallint_table_create_sql ).toMatch( 'val SMALLINT' );
+		assert.match( smallint_table_create_sql, /val SMALLINT/ );
 
 		const Integer = model( {
 			name: 'integer_test',
@@ -599,7 +603,7 @@ describe( 'postgres', () => {
 		} );
 
 		const integer_table_create_sql = integers._create_table_sql();
-		expect( integer_table_create_sql ).toMatch( 'val INTEGER' );
+		assert.match( integer_table_create_sql, /val INTEGER/ );
 
 		const Bigint = model( {
 			name: 'bigint_test',
@@ -624,7 +628,7 @@ describe( 'postgres', () => {
 		} );
 
 		const bigint_table_create_sql = bigints._create_table_sql();
-		expect( bigint_table_create_sql ).toMatch( 'val BIGINT' );
+		assert.match( bigint_table_create_sql, /val BIGINT/ );
 
 		const Unspecified = model( {
 			name: 'unspecified_range_test',
@@ -644,10 +648,10 @@ describe( 'postgres', () => {
 		} );
 
 		const unspecified_table_create_sql = unspecifieds._create_table_sql();
-		expect( unspecified_table_create_sql ).toMatch( 'val INTEGER' );
+		assert.match( unspecified_table_create_sql, /val INTEGER/ );
 	} );
 
-	it( 'should serialize/deserialize integers properly', async () => {
+	group.test( 'should serialize/deserialize integers properly', async () => {
 		const Smallint = model( {
 			name: 'smallint_serialization_test',
 			schema: {
@@ -680,7 +684,7 @@ describe( 'postgres', () => {
 
 		await smallints.close();
 
-		expect( stored_smallint.val ).toEqual( 123 );
+		assert.strictEqual( stored_smallint.val, 123 );
 
 		const Integer = model( {
 			name: 'integer_serialization_test',
@@ -714,7 +718,7 @@ describe( 'postgres', () => {
 
 		await integers.close();
 
-		expect( stored_integer.val ).toEqual( 10123 );
+		assert.strictEqual( stored_integer.val, 10123 );
 
 		const Bigint = model( {
 			name: 'bigint_serialization_test',
@@ -748,7 +752,7 @@ describe( 'postgres', () => {
 
 		await bigints.close();
 
-		expect( stored_bigint.val ).toEqual( -90000000000123n );
+		assert.strictEqual( stored_bigint.val, -90000000000123n );
 
 		const Unspecified = model( {
 			name: 'unspecified_range_serialization_test',
@@ -777,10 +781,10 @@ describe( 'postgres', () => {
 
 		await unspecifieds.close();
 
-		expect( stored_unspecified.val ).toEqual( 123123123 );
+		assert.strictEqual( stored_unspecified.val, 123123123 );
 	} );
 
-	it( 'should serialize/deserialize a JSON object properly', async () => {
+	group.test( 'should serialize/deserialize a JSON object properly', async () => {
 		const JSONObject = model( {
 			name: 'jsonobject',
 			schema: {
@@ -810,14 +814,14 @@ describe( 'postgres', () => {
 
 		const stored = await jsonobjects.get( jsonobject.id );
 
-		expect( stored.val ).toEqual( {
+		assert.deepStrictEqual( stored.val, {
 			foo: 'bar'
 		} );
 
 		await jsonobjects.close();
 	} );
 
-	it( 'should serialize/deserialize a JSON array properly', async () => {
+	group.test( 'should serialize/deserialize a JSON array properly', async () => {
 		const JSONArray = model( {
 			name: 'jsonarray',
 			schema: {
@@ -845,12 +849,12 @@ describe( 'postgres', () => {
 
 		const stored = await jsonarrays.get( jsonarray.id );
 
-		expect( stored.val ).toEqual( [ 1, 2, 3 ] );
+		assert.deepStrictEqual( stored.val, [ 1, 2, 3 ] );
 
 		await jsonarrays.close();
 	} );
 
-	it( 'should serialize/deserialize a boolean properly', async () => {
+	group.test( 'should serialize/deserialize a boolean properly', async () => {
 		const TestModel = model( {
 			name: 'boolean_test',
 			schema: {
@@ -876,12 +880,12 @@ describe( 'postgres', () => {
 
 		const stored = await tests.get( test.id );
 
-		expect( stored ).toEqual( test );
+		assert.deepStrictEqual( stored, test );
 
 		await tests.close();
 	} );
 
-	it( 'should serialize/deserialize a number properly', async () => {
+	group.test( 'should serialize/deserialize a number properly', async () => {
 		const TestModel = model( {
 			name: 'number_test',
 			schema: {
@@ -907,12 +911,12 @@ describe( 'postgres', () => {
 
 		const stored = await tests.get( test.id );
 
-		expect( stored ).toEqual( test );
+		assert.deepStrictEqual( stored, test );
 
 		await tests.close();
 	} );
 
-	it( 'should support column_type_overrides', async () => {
+	group.test( 'should support column_type_overrides', async () => {
 		const Model = model( {
 			name: 'testoverrides',
 			schema: {
@@ -942,7 +946,7 @@ describe( 'postgres', () => {
 		} );
 
 		const table_create_sql = instances._create_table_sql();
-		expect( table_create_sql ).toMatch( 'foo TEXT' );
+		assert.match( table_create_sql, /foo TEXT/ );
 
 		const test = Model.create( {
 			foo: {
@@ -954,12 +958,12 @@ describe( 'postgres', () => {
 
 		const stored = await instances.get( test.id );
 
-		expect( stored ).toEqual( test );
+		assert.deepStrictEqual( stored, test );
 
 		await instances.close();
 	} );
 
-	it( 'should support async serialize/deserialize', async () => {
+	group.test( 'should support async serialize/deserialize', async () => {
 		const Model = model( {
 			name: 'testasyncserialization',
 			schema: {
@@ -1003,12 +1007,12 @@ describe( 'postgres', () => {
 
 		const stored = await instances.get( test.id );
 
-		expect( stored ).toEqual( test );
+		assert.deepStrictEqual( stored, test );
 
 		await instances.close();
 	} );
 
-	it( 'should support where()', async () => {
+	group.test( 'should support where()', async () => {
 		const User = model( {
 			name: 'user',
 			schema: {
@@ -1049,22 +1053,22 @@ describe( 'postgres', () => {
 		const users_with_quote_0 = await users.where( {
 			query: 'quote = \'this is quote 0\''
 		} );
-		expect( Array.isArray( users_with_quote_0 ) ).toBe( true );
-		expect( Array.isArray( users_with_quote_0 ) && users_with_quote_0.length ).toBe( 1 );
+		assert.strictEqual( Array.isArray( users_with_quote_0 ), true );
+		assert.strictEqual( Array.isArray( users_with_quote_0 ) && users_with_quote_0.length, 1 );
 
 		const all_users = await users.where( {
 			query: 'quote LIKE $1',
 			values: [ 'this is quote%' ]
 		} );
-		expect( Array.isArray( all_users ) ).toBe( true );
-		expect( Array.isArray( all_users ) && all_users.length ).toBe( 5 );
+		assert.strictEqual( Array.isArray( all_users ), true );
+		assert.strictEqual( Array.isArray( all_users ) && all_users.length, 5 );
 
 		const has_three_tag_users = await users.where( {
 			query: 'tags ? $1',
 			values: [ 'three' ]
 		} );
-		expect( Array.isArray( has_three_tag_users ) ).toBe( true );
-		expect( Array.isArray( has_three_tag_users ) && has_three_tag_users.length ).toBe( 3 );
+		assert.strictEqual( Array.isArray( has_three_tag_users ), true );
+		assert.strictEqual( Array.isArray( has_three_tag_users ) && has_three_tag_users.length, 3 );
 
 		const limited_users = await users.where( {
 			query: 'email IS NOT NULL',
@@ -1072,8 +1076,8 @@ describe( 'postgres', () => {
 				limit: 2
 			}
 		} );
-		expect( Array.isArray( limited_users ) ).toBe( true );
-		expect( Array.isArray( limited_users ) && limited_users.length ).toBe( 2 );
+		assert.strictEqual( Array.isArray( limited_users ), true );
+		assert.strictEqual( Array.isArray( limited_users ) && limited_users.length, 2 );
 
 		const offset_users = await users.where( {
 			query: 'email IS NOT NULL',
@@ -1081,8 +1085,8 @@ describe( 'postgres', () => {
 				offset: 2
 			}
 		} );
-		expect( Array.isArray( offset_users ) ).toBe( true );
-		expect( Array.isArray( offset_users ) && offset_users.length ).toBe( 3 );
+		assert.strictEqual( Array.isArray( offset_users ), true );
+		assert.strictEqual( Array.isArray( offset_users ) && offset_users.length, 3 );
 
 		const ascending_created_users = [ ...created_users ].sort( ( lhs, rhs ) => lhs.email.localeCompare( rhs.email ) );
 		const sorted_users = await users.where( {
@@ -1094,14 +1098,14 @@ describe( 'postgres', () => {
 				}
 			}
 		} );
-		expect( Array.isArray( sorted_users ) ).toBe( true );
-		expect( Array.isArray( sorted_users ) && sorted_users.length ).toBe( 5 );
-		expect( sorted_users ).toEqual( ascending_created_users );
+		assert.strictEqual( Array.isArray( sorted_users ), true );
+		assert.strictEqual( Array.isArray( sorted_users ) && sorted_users.length, 5 );
+		assert.deepStrictEqual( sorted_users, ascending_created_users );
 
 		await users.close();
 	} );
 
-	it( 'should allow locking', async () => {
+	group.test( 'should allow locking', async () => {
 		const TestModel = model( {
 			name: 'lock_test',
 			schema: {
@@ -1121,7 +1125,7 @@ describe( 'postgres', () => {
 
 		const locked = await tests.try_lock( 1 );
 
-		expect( locked ).toEqual( true );
+		assert.strictEqual( locked, true );
 
 		const other_tests_connection = await databases.postgres.get( TestModel, {
 			db,
@@ -1130,29 +1134,29 @@ describe( 'postgres', () => {
 
 		const second_lock = await other_tests_connection.try_lock( 1 );
 
-		expect( second_lock ).toEqual( false );
+		assert.strictEqual( second_lock, false );
 
 		const unlocked = await tests.unlock( 1 );
 
-		expect( unlocked ).toEqual( true );
+		assert.strictEqual( unlocked, true );
 
 		const third_lock = await other_tests_connection.try_lock( 1 );
 
-		expect( third_lock ).toEqual( true );
+		assert.strictEqual( third_lock, true );
 
 		const fourth_lock = await tests.try_lock( 1 );
 
-		expect( fourth_lock ).toEqual( false );
+		assert.strictEqual( fourth_lock, false );
 
 		const third_lock_unlocked = await other_tests_connection.unlock( 1 );
 
-		expect( third_lock_unlocked ).toEqual( true );
+		assert.strictEqual( third_lock_unlocked, true );
 
 		await tests.close();
 		await other_tests_connection.close();
 	} );
 
-	it( 'should allow locking with two lock arguments', async () => {
+	group.test( 'should allow locking with two lock arguments', async () => {
 		const TestModel = model( {
 			name: 'lock_second_argument_test',
 			schema: {
@@ -1172,7 +1176,7 @@ describe( 'postgres', () => {
 
 		const locked = await tests.try_lock( 1, 2 );
 
-		expect( locked ).toEqual( true );
+		assert.strictEqual( locked, true );
 
 		const other_tests_connection = await databases.postgres.get( TestModel, {
 			db,
@@ -1181,28 +1185,39 @@ describe( 'postgres', () => {
 
 		const second_lock = await other_tests_connection.try_lock( 1, 2 );
 
-		expect( second_lock ).toEqual( false );
+		assert.strictEqual( second_lock, false );
 
 		const unlocked = await tests.unlock( 1, 2 );
 
-		expect( unlocked ).toEqual( true );
+		assert.strictEqual( unlocked, true );
 
 		const third_lock = await other_tests_connection.try_lock( 1, 2 );
 
-		expect( third_lock ).toEqual( true );
+		assert.strictEqual( third_lock, true );
 
 		const fourth_lock = await tests.try_lock( 1, 2 );
 
-		expect( fourth_lock ).toEqual( false );
+		assert.strictEqual( fourth_lock, false );
 
 		const third_lock_unlocked = await other_tests_connection.unlock( 1, 2 );
 
-		expect( third_lock_unlocked ).toEqual( true );
+		assert.strictEqual( third_lock_unlocked, true );
 
-		await expect( async () => { await tests.try_lock( 1, 2, 3 ); } ).rejects.toThrow( 'invalid number of arguments to try_lock()' );
-		expect( async () => { await tests.unlock( 1, 2, 3 ); } ).rejects.toThrow( 'invalid number of arguments to unlock()' );
+		await assert.rejects( async () => {
+			await tests.try_lock( 1, 2, 3 );
+		}, {
+			name: 'Error',
+			message: 'invalid number of arguments to try_lock()'
+		} );
+
+		await assert.rejects( async () => {
+			await tests.unlock( 1, 2, 3 );
+		}, {
+			name: 'Error',
+			message: 'invalid number of arguments to unlock()'
+		} );
 
 		await tests.close();
 		await other_tests_connection.close();
 	} );
-} );
+};

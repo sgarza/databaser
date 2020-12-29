@@ -4,61 +4,38 @@ const assert = require( 'assert' );
 const { datatypes, model } = require( '../index.js' );
 
 module.exports = async ( plaintest ) => {
-	const group = plaintest.group( 'datatypes.number' );
+	const group = plaintest.group( 'datatypes.phone' );
 
 	group.test( 'should have expected implementation', () => {
-		assert.strictEqual( typeof datatypes.number, 'function' );
+		assert.strictEqual( typeof datatypes.phone, 'function' );
 
-		const obj = datatypes.number();
+		const obj = datatypes.phone();
 
-		assert.strictEqual( obj?.datatype, 'number' );
+		assert.strictEqual( obj?.datatype, 'phone' );
 		assert.deepStrictEqual( obj?.options, {
 			nullable: true,
-			unique: false,
-			range: {
+			length: {
 				min: undefined,
-				max: undefined
+				max: 32
 			},
+			unique: false,
 			initial: undefined,
 			validate: undefined,
-			example: 11.11
+			example: '+12135555555'
 		} );
 
 		assert.strictEqual( typeof obj?.initial, 'function' );
 		assert.strictEqual( typeof obj?.validate, 'function' );
 	} );
 
-	group.test( 'should not allow non number types', () => {
-		const Validation = model( {
-			name: 'not_a_number',
-			schema: {
-				val: datatypes.number()
-			}
-		} );
-
-		const good = Validation.create( {
-			val: 1
-		} );
-
-		const bad = Validation.create( {
-			val: 'foo'
-		} );
-
-		assert.deepStrictEqual( Validation.validate( good ), [] );
-		assert.deepStrictEqual( Validation.validate( bad ), [ {
-			field: 'val',
-			error: 'invalid type'
-		} ] );
-	} );
-
 	group.test( 'should allow custom validation', () => {
 		const Validation = model( {
 			name: 'validation',
 			schema: {
-				val: datatypes.number( {
+				val: datatypes.phone( {
 					validate: ( value ) => {
-						if ( value !== 1 ) {
-							return 'not 1';
+						if ( value !== '+12135555555' ) {
+							return 'not the right phone';
 						}
 					}
 				} )
@@ -66,17 +43,17 @@ module.exports = async ( plaintest ) => {
 		} );
 
 		const good = Validation.create( {
-			val: 1
+			val: '+12135555555'
 		} );
 
 		const bad = Validation.create( {
-			val: 2
+			val: '+12135555556'
 		} );
 
 		assert.deepStrictEqual( Validation.validate( good ), [] );
 		assert.deepStrictEqual( Validation.validate( bad ), [ {
 			field: 'val',
-			error: 'not 1'
+			error: 'not the right phone'
 		} ] );
 	} );
 };

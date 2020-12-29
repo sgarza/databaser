@@ -1,23 +1,27 @@
 'use strict';
 
+const assert = require( 'assert' );
 const { datatypes, model } = require( '../index.js' );
 
-describe( 'datatypes.boolean', () => {
-	it( 'should have expected implementation', () => {
-		expect( typeof datatypes.boolean ).toEqual( 'function' );
-		expect( datatypes.boolean() ).toMatchObject( {
-			datatype: 'boolean',
-			options: expect.objectContaining( {
-				nullable: expect.any( Boolean ),
-				initial: undefined,
-				validate: undefined
-			} ),
-			initial: expect.any( Function ),
-			validate: expect.any( Function )
+module.exports = async ( plaintest ) => {
+	const group = plaintest.group( 'datatypes.boolean' );
+
+	group.test( 'should have expected implementation', () => {
+		assert.strictEqual( typeof datatypes.boolean, 'function' );
+
+		const bool = datatypes.boolean();
+		assert.strictEqual( bool?.datatype, 'boolean' );
+		assert.deepStrictEqual( bool?.options, {
+			nullable: true,
+			initial: undefined,
+			validate: undefined,
+			example: true
 		} );
+		assert.strictEqual( typeof bool?.initial, 'function' );
+		assert.strictEqual( typeof bool?.validate, 'function' );
 	} );
 
-	it( 'should validate the boolean', () => {
+	group.test( 'should validate the boolean', () => {
 		const Boolean = model( {
 			name: 'boolean',
 			schema: {
@@ -33,14 +37,14 @@ describe( 'datatypes.boolean', () => {
 			bool: 'invalid'
 		} );
 
-		expect( Boolean.validate( good ) ).toEqual( [] );
-		expect( Boolean.validate( bad ) ).toEqual( [ {
+		assert.deepStrictEqual( Boolean.validate( good ), [] );
+		assert.deepStrictEqual( Boolean.validate( bad ), [ {
 			field: 'bool',
 			error: 'invalid value'
 		} ] );
 	} );
 
-	it( 'should allow additional custom validation', () => {
+	group.test( 'should allow additional custom validation', () => {
 		const Boolean = model( {
 			name: 'boolean',
 			schema: {
@@ -62,10 +66,10 @@ describe( 'datatypes.boolean', () => {
 			bool: false
 		} );
 
-		expect( Boolean.validate( good ) ).toEqual( [] );
-		expect( Boolean.validate( bad ) ).toEqual( [ {
+		assert.deepStrictEqual( Boolean.validate( good ), [] );
+		assert.deepStrictEqual( Boolean.validate( bad ), [ {
 			field: 'bool',
 			error: 'not true'
 		} ] );
 	} );
-} );
+};

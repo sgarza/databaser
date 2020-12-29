@@ -1,28 +1,34 @@
 'use strict';
 
+const assert = require( 'assert' );
 const { datatypes, model } = require( '../index.js' );
 
-describe( 'datatypes.integer', () => {
-	it( 'should have expected implementation', () => {
-		expect( typeof datatypes.integer ).toEqual( 'function' );
-		expect( datatypes.integer() ).toMatchObject( {
-			datatype: 'integer',
-			options: expect.objectContaining( {
-				nullable: expect.any( Boolean ),
-				unique: expect.any( Boolean ),
-				range: expect.objectContaining( {
-					min: undefined,
-					max: undefined
-				} ),
-				initial: undefined,
-				validate: undefined
-			} ),
-			initial: expect.any( Function ),
-			validate: expect.any( Function )
+module.exports = async ( plaintest ) => {
+	const group = plaintest.group( 'datatypes.integer' );
+
+	group.test( 'should have expected implementation', () => {
+		assert.strictEqual( typeof datatypes.integer, 'function' );
+
+		const obj = datatypes.integer();
+
+		assert.strictEqual( obj?.datatype, 'integer' );
+		assert.deepStrictEqual( obj?.options, {
+			nullable: true,
+			unique: false,
+			range: {
+				min: undefined,
+				max: undefined
+			},
+			initial: undefined,
+			validate: undefined,
+			example: 11
 		} );
+
+		assert.strictEqual( typeof obj?.initial, 'function' );
+		assert.strictEqual( typeof obj?.validate, 'function' );
 	} );
 
-	it( 'should not allow non number types', () => {
+	group.test( 'should not allow non number types', () => {
 		const Validation = model( {
 			name: 'not_a_number',
 			schema: {
@@ -38,14 +44,14 @@ describe( 'datatypes.integer', () => {
 			val: 'foo'
 		} );
 
-		expect( Validation.validate( good ) ).toEqual( [] );
-		expect( Validation.validate( bad ) ).toEqual( [ {
+		assert.deepStrictEqual( Validation.validate( good ), [] );
+		assert.deepStrictEqual( Validation.validate( bad ), [ {
 			field: 'val',
 			error: 'invalid type'
 		} ] );
 	} );
 
-	it( 'should not allow floating point numbers', () => {
+	group.test( 'should not allow floating point numbers', () => {
 		const Validation = model( {
 			name: 'not_floating_point',
 			schema: {
@@ -61,14 +67,14 @@ describe( 'datatypes.integer', () => {
 			val: 1.1
 		} );
 
-		expect( Validation.validate( good ) ).toEqual( [] );
-		expect( Validation.validate( bad ) ).toEqual( [ {
+		assert.deepStrictEqual( Validation.validate( good ), [] );
+		assert.deepStrictEqual( Validation.validate( bad ), [ {
 			field: 'val',
 			error: 'invalid value'
 		} ] );
 	} );
 
-	it( 'should allow custom validation', () => {
+	group.test( 'should allow custom validation', () => {
 		const Validation = model( {
 			name: 'validation',
 			schema: {
@@ -90,10 +96,10 @@ describe( 'datatypes.integer', () => {
 			val: 2
 		} );
 
-		expect( Validation.validate( good ) ).toEqual( [] );
-		expect( Validation.validate( bad ) ).toEqual( [ {
+		assert.deepStrictEqual( Validation.validate( good ), [] );
+		assert.deepStrictEqual( Validation.validate( bad ), [ {
 			field: 'val',
 			error: 'not 1'
 		} ] );
 	} );
-} );
+};

@@ -12,6 +12,7 @@ module.exports = ( _options = {} ) => {
 		nullable: true,
 		unique: false,
 		initial: undefined,
+		validate: undefined,
 		example: '8bb846ee-a778-4378-9635-34b54956675d'
 	}, _options );
 
@@ -27,14 +28,21 @@ module.exports = ( _options = {} ) => {
 		},
 		validate: ( value ) => {
 			if ( !options.nullable && value === null ) {
-				return {
-					error: 'null value not allowed'
-				};
+				return 'null value not allowed';
 			} else if ( options.nullable && value === null ) {
 				return;
 			}
 
-			return value !== null && !UUID_REGEX.test( value ) ? 'invalid value format' : undefined;
+			if ( !UUID_REGEX.test( value ) ) {
+				return 'invalid value format';
+			}
+
+			if ( typeof options.validate === 'function' ) {
+				const error = options.validate( value );
+				if ( error ) {
+					return error;
+				}
+			}
 		}
 	};
 };

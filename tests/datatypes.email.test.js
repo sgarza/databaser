@@ -4,61 +4,38 @@ const assert = require( 'assert' );
 const { datatypes, model } = require( '../index.js' );
 
 module.exports = async ( plaintest ) => {
-	const group = plaintest.group( 'datatypes.number' );
+	const group = plaintest.group( 'datatypes.email' );
 
 	group.test( 'should have expected implementation', () => {
-		assert.strictEqual( typeof datatypes.number, 'function' );
+		assert.strictEqual( typeof datatypes.email, 'function' );
 
-		const obj = datatypes.number();
+		const obj = datatypes.email();
 
-		assert.strictEqual( obj?.datatype, 'number' );
+		assert.strictEqual( obj?.datatype, 'email' );
 		assert.deepStrictEqual( obj?.options, {
 			nullable: true,
 			unique: false,
-			range: {
-				min: undefined,
-				max: undefined
-			},
 			initial: undefined,
 			validate: undefined,
-			example: 11.11
+			length: {
+				max: undefined,
+				min: 5
+			},
+			example: 'you@domain.com'
 		} );
 
 		assert.strictEqual( typeof obj?.initial, 'function' );
 		assert.strictEqual( typeof obj?.validate, 'function' );
 	} );
 
-	group.test( 'should not allow non number types', () => {
-		const Validation = model( {
-			name: 'not_a_number',
-			schema: {
-				val: datatypes.number()
-			}
-		} );
-
-		const good = Validation.create( {
-			val: 1
-		} );
-
-		const bad = Validation.create( {
-			val: 'foo'
-		} );
-
-		assert.deepStrictEqual( Validation.validate( good ), [] );
-		assert.deepStrictEqual( Validation.validate( bad ), [ {
-			field: 'val',
-			error: 'invalid type'
-		} ] );
-	} );
-
 	group.test( 'should allow custom validation', () => {
 		const Validation = model( {
 			name: 'validation',
 			schema: {
-				val: datatypes.number( {
+				val: datatypes.email( {
 					validate: ( value ) => {
-						if ( value !== 1 ) {
-							return 'not 1';
+						if ( value !== 'you@domain.com' ) {
+							return 'not you@domain.com';
 						}
 					}
 				} )
@@ -66,17 +43,17 @@ module.exports = async ( plaintest ) => {
 		} );
 
 		const good = Validation.create( {
-			val: 1
+			val: 'you@domain.com'
 		} );
 
 		const bad = Validation.create( {
-			val: 2
+			val: 'you@otherdomain.com'
 		} );
 
 		assert.deepStrictEqual( Validation.validate( good ), [] );
 		assert.deepStrictEqual( Validation.validate( bad ), [ {
 			field: 'val',
-			error: 'not 1'
+			error: 'not you@domain.com'
 		} ] );
 	} );
 };

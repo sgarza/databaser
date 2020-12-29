@@ -4,61 +4,34 @@ const assert = require( 'assert' );
 const { datatypes, model } = require( '../index.js' );
 
 module.exports = async ( plaintest ) => {
-	const group = plaintest.group( 'datatypes.number' );
+	const group = plaintest.group( 'datatypes.UUID' );
 
 	group.test( 'should have expected implementation', () => {
-		assert.strictEqual( typeof datatypes.number, 'function' );
+		assert.strictEqual( typeof datatypes.UUID, 'function' );
 
-		const obj = datatypes.number();
+		const obj = datatypes.UUID();
 
-		assert.strictEqual( obj?.datatype, 'number' );
+		assert.strictEqual( obj?.datatype, 'UUID' );
 		assert.deepStrictEqual( obj?.options, {
 			nullable: true,
 			unique: false,
-			range: {
-				min: undefined,
-				max: undefined
-			},
 			initial: undefined,
 			validate: undefined,
-			example: 11.11
+			example: '8bb846ee-a778-4378-9635-34b54956675d'
 		} );
 
 		assert.strictEqual( typeof obj?.initial, 'function' );
 		assert.strictEqual( typeof obj?.validate, 'function' );
 	} );
 
-	group.test( 'should not allow non number types', () => {
-		const Validation = model( {
-			name: 'not_a_number',
-			schema: {
-				val: datatypes.number()
-			}
-		} );
-
-		const good = Validation.create( {
-			val: 1
-		} );
-
-		const bad = Validation.create( {
-			val: 'foo'
-		} );
-
-		assert.deepStrictEqual( Validation.validate( good ), [] );
-		assert.deepStrictEqual( Validation.validate( bad ), [ {
-			field: 'val',
-			error: 'invalid type'
-		} ] );
-	} );
-
 	group.test( 'should allow custom validation', () => {
 		const Validation = model( {
 			name: 'validation',
 			schema: {
-				val: datatypes.number( {
+				val: datatypes.string( {
 					validate: ( value ) => {
-						if ( value !== 1 ) {
-							return 'not 1';
+						if ( value !== '61749346-cddb-42b9-ac75-42f73242f6a8' ) {
+							return 'not correct';
 						}
 					}
 				} )
@@ -66,17 +39,17 @@ module.exports = async ( plaintest ) => {
 		} );
 
 		const good = Validation.create( {
-			val: 1
+			val: '61749346-cddb-42b9-ac75-42f73242f6a8'
 		} );
 
 		const bad = Validation.create( {
-			val: 2
+			val: '12a1e890-fd7f-40a9-bad1-bbc4f2f39ff9'
 		} );
 
 		assert.deepStrictEqual( Validation.validate( good ), [] );
 		assert.deepStrictEqual( Validation.validate( bad ), [ {
 			field: 'val',
-			error: 'not 1'
+			error: 'not correct'
 		} ] );
 	} );
 };

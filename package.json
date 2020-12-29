@@ -4,14 +4,15 @@
   "description": "database thing",
   "main": "index.js",
   "scripts": {
-    "test": "JEST_CIRCUS=1 jest --verbose=true"
+    "test": "node tests/index.js | tap-spec"
   },
   "author": "Andy Burke <andy.burke@mailbox.earth>",
   "license": "MIT",
   "devDependencies": {
     "eslint": "^7.16.0",
-    "jest": "^26.6.3",
-    "jest-circus": "^26.6.3"
+    "plaintest": "^0.1.0",
+    "require-all": "^3.0.0",
+    "tap-spec": "^5.0.0"
   },
   "dependencies": {
     "date-fns": "^2.16.1",

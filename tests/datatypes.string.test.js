@@ -1,28 +1,34 @@
 'use strict';
 
+const assert = require( 'assert' );
 const { datatypes, model } = require( '../index.js' );
 
-describe( 'datatypes.string', () => {
-	it( 'should have expected implementation', () => {
-		expect( typeof datatypes.string ).toEqual( 'function' );
-		expect( datatypes.string() ).toMatchObject( {
-			datatype: 'string',
-			options: expect.objectContaining( {
-				nullable: expect.any( Boolean ),
-				length: expect.objectContaining( {
-					min: undefined,
-					max: undefined
-				} ),
-				unique: expect.any( Boolean ),
-				initial: undefined,
-				validate: undefined
-			} ),
-			initial: expect.any( Function ),
-			validate: expect.any( Function )
+module.exports = async ( plaintest ) => {
+	const group = plaintest.group( 'datatypes.string' );
+
+	group.test( 'should have expected implementation', () => {
+		assert.strictEqual( typeof datatypes.string, 'function' );
+
+		const obj = datatypes.string();
+
+		assert.strictEqual( obj?.datatype, 'string' );
+		assert.deepStrictEqual( obj?.options, {
+			nullable: true,
+			length: {
+				min: undefined,
+				max: undefined
+			},
+			unique: false,
+			initial: undefined,
+			validate: undefined,
+			example: 'hello'
 		} );
+
+		assert.strictEqual( typeof obj?.initial, 'function' );
+		assert.strictEqual( typeof obj?.validate, 'function' );
 	} );
 
-	it( 'should allow custom validation', () => {
+	group.test( 'should allow custom validation', () => {
 		const Validation = model( {
 			name: 'validation',
 			schema: {
@@ -44,10 +50,10 @@ describe( 'datatypes.string', () => {
 			val: 'bar'
 		} );
 
-		expect( Validation.validate( good ) ).toEqual( [] );
-		expect( Validation.validate( bad ) ).toEqual( [ {
+		assert.deepStrictEqual( Validation.validate( good ), [] );
+		assert.deepStrictEqual( Validation.validate( bad ), [ {
 			field: 'val',
 			error: 'not foo'
 		} ] );
 	} );
-} );
+};

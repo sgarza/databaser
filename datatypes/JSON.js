@@ -6,6 +6,7 @@ module.exports = ( _options = {} ) => {
 	const options = deepmerge( {
 		nullable: true,
 		initial: undefined,
+		validate: undefined,
 		example: {
 			foo: 'bar'
 		}
@@ -37,10 +38,16 @@ module.exports = ( _options = {} ) => {
 
 			try {
 				JSON.stringify( value );
-				return undefined;
 			}
 			catch( ex ) {
 				return 'invalid value format';
+			}
+
+			if ( typeof options.validate === 'function' ) {
+				const error = options.validate( value );
+				if ( error ) {
+					return error;
+				}
 			}
 		},
 		serialize: ( value ) => ( JSON.stringify( value ) ),

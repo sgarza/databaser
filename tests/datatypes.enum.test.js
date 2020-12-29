@@ -1,24 +1,29 @@
 'use strict';
 
+const assert = require( 'assert' );
 const { datatypes, model } = require( '../index.js' );
 
-describe( 'datatypes.enum', () => {
-	it( 'should have expected implementation', () => {
-		expect( typeof datatypes.enum ).toEqual( 'function' );
-		expect( datatypes.enum() ).toMatchObject( {
-			datatype: 'enum',
-			options: expect.objectContaining( {
-				nullable: expect.any( Boolean ),
-				initial: undefined,
-				validate: undefined,
-				values: expect.any( Array )
-			} ),
-			initial: expect.any( Function ),
-			validate: expect.any( Function )
+module.exports = async ( plaintest ) => {
+	const group = plaintest.group( 'datatypes.enum' );
+
+	group.test( 'should have expected implementation', () => {
+		assert.strictEqual( typeof datatypes.enum, 'function' );
+
+		const obj = datatypes.enum();
+
+		assert.strictEqual( obj?.datatype, 'enum' );
+		assert.deepStrictEqual( obj?.options, {
+			nullable: true,
+			initial: undefined,
+			validate: undefined,
+			values: [],
+			example: undefined
 		} );
+		assert.strictEqual( typeof obj?.initial, 'function' );
+		assert.strictEqual( typeof obj?.validate, 'function' );
 	} );
 
-	it( 'should validate that values are members of the enum', () => {
+	group.test( 'should validate that values are members of the enum', () => {
 		const Enum = model( {
 			name: 'enum',
 			schema: {
@@ -40,14 +45,14 @@ describe( 'datatypes.enum', () => {
 			enum: 'invalid'
 		} );
 
-		expect( Enum.validate( good ) ).toEqual( [] );
-		expect( Enum.validate( bad ) ).toEqual( [ {
+		assert.deepStrictEqual( Enum.validate( good ), [] );
+		assert.deepStrictEqual( Enum.validate( bad ), [ {
 			field: 'enum',
 			error: 'invalid value'
 		} ] );
 	} );
 
-	it( 'should allow additional custom validation', () => {
+	group.test( 'should allow additional custom validation', () => {
 		const Enum = model( {
 			name: 'enum',
 			schema: {
@@ -74,10 +79,10 @@ describe( 'datatypes.enum', () => {
 			enum: 'bar'
 		} );
 
-		expect( Enum.validate( good ) ).toEqual( [] );
-		expect( Enum.validate( bad ) ).toEqual( [ {
+		assert.deepStrictEqual( Enum.validate( good ), [] );
+		assert.deepStrictEqual( Enum.validate( bad ), [ {
 			field: 'enum',
 			error: 'not foo'
 		} ] );
 	} );
-} );
+};

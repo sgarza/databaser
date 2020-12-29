@@ -1,36 +1,51 @@
 'use strict';
 
+const assert = require( 'assert' );
 const { datatypes, model } = require( '../index.js' );
 
-describe( 'model', () => {
-	it( 'should be a function', () => {
-		expect( typeof model ).toEqual( 'function' );
+module.exports = async ( plaintest ) => {
+	const group = plaintest.group( 'model' );
+
+	group.test( 'should be a function', () => {
+		assert.strictEqual( typeof model, 'function' );
 	} );
 
-	it( 'should throw if no name is specified', () => {
-		expect( () => ( model() ) ).toThrow( 'name' );
-	} );
-
-	it( 'should throw if no schema is specified', () => {
-		expect( () => ( model( {
-			name: 'foo'
-		} ) ) ).toThrow( 'schema' );
-	} );
-
-	it( 'should return a model when given a name and schema', () => {
-		expect( model( {
-			name: 'user',
-			schema: {
-				id: datatypes.string()
-			}
-		} ) ).toMatchObject( {
-			options: expect.objectContaining( {
-				schema: expect.objectContaining( {
-					id: expect.any( Object )
-				} )
-			} ),
-			create: expect.any( Function ),
-			validate: expect.any( Function )
+	group.test( 'should throw if no name is specified', () => {
+		assert.throws( () => {
+			model();
+		}, {
+			name: 'Error',
+			message: 'You must specify a name to create a model.'
 		} );
 	} );
-} );
+
+	group.test( 'should throw if no schema is specified', () => {
+		assert.throws( () => {
+			model( {
+				name: 'foo'
+			} );
+		}, {
+			name: 'Error',
+			message: 'You must specify a schema to create a model.'
+		} );
+	} );
+
+	group.test( 'should return a model when given a name and schema', () => {
+		const id = datatypes.string();
+		const obj = model( {
+			name: 'user',
+			schema: {
+				id
+			}
+		} );
+		
+		assert.strictEqual( typeof obj?.create, 'function' );
+		assert.strictEqual( typeof obj?.validate, 'function' );
+		assert.deepStrictEqual( obj?.options, {
+			name: 'user',
+			schema: {
+				id
+			}
+		} );
+	} );
+};

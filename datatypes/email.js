@@ -6,12 +6,13 @@ const string = require( './string.js' );
 module.exports = ( _options = {} ) => {
 	const options = deepmerge( {
 		nullable: true,
+		unique: false,
+		initial: undefined,
+		validate: undefined,
 		length: {
 			min: 5,
 			max: undefined
 		},
-		unique: false,
-		initial: undefined,
 		example: 'you@domain.com'
 	}, _options );
 
@@ -33,7 +34,16 @@ module.exports = ( _options = {} ) => {
 				return error;
 			}
 
-			return value !== null && !/^.+@.+\..+$/.test( value ) ? 'invalid value format' : undefined;
+			if ( !/^.+@.+\..+$/.test( value ) ) {
+				return 'invalid value format';
+			}
+
+			if ( typeof options.validate === 'function' ) {
+				const error = options.validate( value );
+				if ( error ) {
+					return error;
+				}
+			}
 		}
 	};
 };
