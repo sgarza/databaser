@@ -28,6 +28,54 @@ module.exports = async ( plaintest ) => {
 		assert.strictEqual( typeof obj?.validate, 'function' );
 	} );
 
+	group.test( 'should handle null values', () => {
+		const nullable = model( {
+			name: 'validation',
+			schema: {
+				val: datatypes.email( {
+					nullable: true
+				} )
+			}
+		} );
+
+		const nullable_good = nullable.create( {
+			val: null
+		} );
+
+		const nullable_bad = nullable.create( {
+			val: 'foofoo'
+		} );
+
+		assert.deepStrictEqual( nullable.validate( nullable_good ), [] );
+		assert.deepStrictEqual( nullable.validate( nullable_bad ), [ {
+			field: 'val',
+			error: 'invalid value format'
+		} ] );
+
+		const non_nullable = model( {
+			name: 'validation',
+			schema: {
+				val: datatypes.email( {
+					nullable: false
+				} )
+			}
+		} );
+
+		const non_nullable_good = non_nullable.create( {
+			val: 'foo@domain.com'
+		} );
+
+		const non_nullable_bad = non_nullable.create( {
+			val: null
+		} );
+
+		assert.deepStrictEqual( non_nullable.validate( non_nullable_good ), [] );
+		assert.deepStrictEqual( non_nullable.validate( non_nullable_bad ), [ {
+			field: 'val',
+			error: 'null value not allowed'
+		} ] );
+	} );	
+
 	group.test( 'should allow custom validation', () => {
 		const Validation = model( {
 			name: 'validation',

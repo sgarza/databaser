@@ -36,6 +36,13 @@ module.exports = ( _options = {} ) => {
 				return error;
 			}
 
+			if ( !options.nullable && value === null ) {
+				return 'null value not allowed';
+			}
+			else if ( options.nullable && value === null ) {
+				return;
+			}
+
 			if ( !PHONE_REGEX.test( value ) ) {
 				return 'invalid value format';
 			}
