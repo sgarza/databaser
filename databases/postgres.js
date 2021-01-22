@@ -47,14 +47,16 @@ pg.Pool.prototype.connect = function ( callback ) {
 const DATATYPE_MAP = {
 	boolean: () => ( 'BOOLEAN' ),
 
+	date: () => ( 'DATE' ),
+
 	email: ( field ) => ( field.options.length.max ? `VARCHAR(${ field.options.length.max })` : 'TEXT' ),
 
 	// NOTE: we store enums as strings in postgres for a few reasons:
 	//   - there's no trivial CREATE TYPE ... IF NOT EXISTS
 	//   - if you modify the values allowed in the enum, we would need to do a lot of altering, and might not know
-	//	 exactly how that should be handled
+	//     exactly how that should be handled
 	//   - there's disagreement about doing this altering since it cannot happen in a transaction
-	// so we will just store it as TEXT for now
+	//     so we will just store it as TEXT for now
 	enum: () => ( 'TEXT' ),
 
 	integer: ( field ) => {
@@ -105,6 +107,8 @@ const DATATYPE_SERIALIZERS = {
 };
 
 const DATATYPE_DESERIALIZERS = {
+	date: ( value ) => ( value ? dates.format( new Date( value ), 'yyyy-MM-dd' ) : value ),
+
 	integer: ( value, field ) => {
 		const storage_type = DATATYPE_MAP.integer( field );
 

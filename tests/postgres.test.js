@@ -490,6 +490,72 @@ module.exports = async ( plaintest ) => {
 		await users.close();
 	} );
 
+	group.test( 'should serialize/deserialize a date properly', async () => {
+		const User = model( {
+			name: 'user',
+			schema: {
+				id: datatypes.UUID( {
+					nullable: false,
+					unique: true,
+					primary: true
+				} ),
+				created_on: datatypes.date()
+			}
+		} );
+
+		const user = User.create();
+
+		const users = await databases.postgres.get( User, {
+			db,
+			table: 'users_date_serialization'
+		} );
+
+		await users.put( user );
+
+		const stored_user = await users.get( user.id );
+
+		assert.deepStrictEqual( stored_user, user );
+
+		await users.close();
+	} );
+
+	group.test( 'should serialize/deserialize a date in UTC properly', async () => {
+
+		const PREV_TZ = process.env.TZ;
+		process.env.TZ = 'utc';
+
+		const User = model( {
+			name: 'user',
+			schema: {
+				id: datatypes.UUID( {
+					nullable: false,
+					unique: true,
+					primary: true
+				} ),
+				created_on: datatypes.date( {
+					initial: '2021-01-21'
+				} )
+			}
+		} );
+
+		const user = User.create();
+
+		const users = await databases.postgres.get( User, {
+			db,
+			table: 'users_date_utc_serialization'
+		} );
+
+		await users.put( user );
+
+		const stored_user = await users.get( user.id );
+
+		assert.deepStrictEqual( stored_user, user );
+
+		await users.close();
+
+		process.env.TZ = PREV_TZ;
+	} );
+
 	group.test( 'should serialize/deserialize an ISODate properly', async () => {
 		const User = model( {
 			name: 'user',

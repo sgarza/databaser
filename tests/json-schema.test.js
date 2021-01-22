@@ -15,6 +15,7 @@ module.exports = async ( plaintest ) => {
 				} ),
 				active: datatypes.boolean(),
 				email: datatypes.email(),
+				date: datatypes.date(),
 				state: datatypes.enum( {
 					values: [
 						'pending',
@@ -90,6 +91,14 @@ module.exports = async ( plaintest ) => {
 					minLength: 5,
 					example: 'you@domain.com',
 					nullable: true
+				},
+				date: {
+					type: 'string',
+					format: 'date',
+					minLength: 10,
+					maxLength: 10,
+					nullable: true,
+					example: '2021-01-21'
 				},
 				state: {
 					type: 'string',

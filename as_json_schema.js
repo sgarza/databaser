@@ -10,6 +10,14 @@ const DATATYPE_MAP = {
 		example: field.options.example,
 		nullable: field.options.nullable
 	} ),
+	date: ( field ) => ( {
+		type: 'string',
+		format: 'date',
+		minLength: field.options.length.min,
+		maxLength: field.options.length.max,
+		nullable: field.options.nullable,
+		example: field.options.example
+	} ),
 	email: ( field ) => ( {
 		type: 'string',
 		format: 'email',
