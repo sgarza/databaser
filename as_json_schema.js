@@ -102,7 +102,7 @@ function property_map( value ) {
 		return;
 	}
 
-	if ( value.datatype ) {
+	if ( value !== null && value.datatype ) {
 		this.update( DATATYPE_MAP[ value.datatype ]( value ), true );
 		return;
 	}
