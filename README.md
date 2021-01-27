@@ -38,7 +38,19 @@ const User = model( {
 			deleted: datatypes.ISODate( {
 				initial: null
 			} )
-		}
+		},
+		unstored: datatypes.string( {
+			nullable: true,
+			initial: null,
+			example: 'hello',
+			stored: false
+		} ),
+		not_in_json_schema: datatypes.string( {
+			nullable: true,
+			initial: null,
+			example: 'not here',
+			json_schema: false
+		} )
 	}
 } );
 

@@ -214,7 +214,7 @@ module.exports = {
 			_create_table_sql: function() {
 				const columns = {};
 				traverse( model.options.schema ).forEach( function( field ) {
-					if ( typeof field === 'object' && !!field && field.datatype ) {
+					if ( typeof field === 'object' && !!field && field.datatype && field.options.stored !== false ) {
 						const key = options.column_name( this.path );
 						const mapper = DATATYPE_MAP[ field.datatype ];
 						if ( !mapper ) {
@@ -288,7 +288,7 @@ module.exports = {
 				const schema_paths = schema_traverser.paths();
 				for ( const path of schema_paths ) {
 					const field = schema_traverser.get( path );
-					if ( typeof field === 'object' && !!field && field.datatype ) {
+					if ( typeof field === 'object' && !!field && field.datatype && field.options.stored !== false ) {
 						const key = options.column_name( path );
 						const value = object_traverser.get( path );
 						const serializer = options.serializers[ key ] || DATATYPE_SERIALIZERS[ field.datatype ];
@@ -314,7 +314,7 @@ module.exports = {
 				const schema_paths = schema_traverser.paths();
 				for ( const path of schema_paths ) {
 					const field = schema_traverser.get( path );
-					if ( typeof field === 'object' && !!field && field.datatype ) {
+					if ( typeof field === 'object' && !!field && field.datatype && field.options.stored !== false ) {
 						const key = options.column_name( path );
 						const value = object_traverser.get( [ key ] );
 						const deserializer = options.deserializers[ key ] || DATATYPE_DESERIALIZERS[ field.datatype ];

@@ -195,6 +195,42 @@ module.exports = async ( plaintest ) => {
 		await users.close();
 	} );
 
+	group.test( 'should not store fields with stored: false', async () => {
+		const Unstored_Fields = model( {
+			name: 'unstored_fields',
+			schema: {
+				id: datatypes.UUID( {
+					nullable: false,
+					unique: true,
+					primary: true
+				} ),
+				val: datatypes.integer( {
+					initial: 123,
+					stored: false
+				} )
+			}
+		} );
+
+		const test_db = await databases.postgres.get( Unstored_Fields, {
+			db,
+			table: 'unstored_fields_test_table'
+		} );
+
+		const table_create_sql = test_db._create_table_sql();
+		assert.ok( !/val/.test( table_create_sql ) );
+
+		const test = Unstored_Fields.create( {} );
+		assert.strictEqual( test.val, 123 );
+
+		await test_db.put( test );
+
+		const found = await test_db.get( test.id );
+		assert.ok( found );
+		assert.strictEqual( found.val, 123 );
+
+		await test_db.close();
+	} );
+
 	group.test( 'should find a model instance', async () => {
 		const User = model( {
 			name: 'user',

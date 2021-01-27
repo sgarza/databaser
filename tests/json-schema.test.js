@@ -61,7 +61,12 @@ module.exports = async ( plaintest ) => {
 							nullable: false
 						} )
 					}
-				}
+				},
+				not_in_json_schema: datatypes.string( {
+					nullable: true,
+					initial: 'hello',
+					json_schema: false
+				} )
 			}
 		} );
 		

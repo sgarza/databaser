@@ -87,6 +87,11 @@ const DATATYPE_MAP = {
 };
 
 function property_map( value ) {
+	if ( value && value.options && value.options.json_schema === false ) {
+		this.remove();
+		return;
+	}
+
 	if ( Array.isArray( value ) && this.path[ this.path.length - 1 ] === 'required' ) {
 		this.update( value );
 		return;
