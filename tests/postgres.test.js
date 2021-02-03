@@ -29,7 +29,9 @@ module.exports = async ( plaintest ) => {
 			// do nothing, it's ok if this failed since the container may not be orphaned to clean up
 		}
 
-		child_process.execSync( `docker \
+		// don't wait for this to come up specifically so the postgres tests will exercise
+		// the automatic connection waiting behavior
+		child_process.exec( `docker \
 			run -d \
 			-p ${ db.host }:${ db.port }:5432/tcp \
 			-e POSTGRES_PASSWORD=${ db.password } \
@@ -40,10 +42,10 @@ module.exports = async ( plaintest ) => {
 			--name databaser-test-postgres \
 			postgres:${ POSTGRES_VERSION }` );
 
-		let postgres_listening = false;
-		do {
-			postgres_listening = child_process.execSync( 'docker inspect --format "{{json .State.Health.Status }}" databaser-test-postgres' ).toString().trim().match( /healthy/i );
-		} while( !postgres_listening );
+		// let postgres_listening = false;
+		// do {
+		// 	postgres_listening = child_process.execSync( 'docker inspect --format "{{json .State.Health.Status }}" databaser-test-postgres' ).toString().trim().match( /healthy/i );
+		// } while( !postgres_listening );
 	} );
 
 	group.after.all.push( async () => {

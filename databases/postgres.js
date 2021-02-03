@@ -7,10 +7,12 @@ const pluralize = require( 'pluralize' );
 const traverse = require( 'traverse' );
 
 // TODO: remove this if https://github.com/brianc/node-postgres/issues/1789 is fixed
-const RETRYABLE_ERROR_CODES = [
-	'ECONNREFUSED', // connection refused
-	'57P03' // cannot_connect_now
-];
+const RETRYABLE_ERROR_CODES = {
+	'ECONNREFUSED': true, // connection refused
+	'ECONNRESET': true,
+	'57P03': true, // cannot_connect_now
+	'Error: Connection terminated unexpectedly': true
+};
 pg.Pool.prototype.___connect = pg.Pool.prototype.connect;
 pg.Pool.prototype.connect = function ( callback ) {
 	this.__retries = this.__retries ?? 0;
@@ -18,7 +20,7 @@ pg.Pool.prototype.connect = function ( callback ) {
 
 	try {
 		this.___connect( ( error, client ) => {
-			if ( error && RETRYABLE_ERROR_CODES.includes( error.code ) && this.__retries < max_retries ) {
+			if ( error && RETRYABLE_ERROR_CODES[ error.code ?? error ] && this.__retries < max_retries ) {
 				console.warn( `Error connecting to Postgres, retrying... (${ this.__retries + 1 })` );
 				this.__retries++;
 				setTimeout( this.connect.bind( this, callback ), 1000 );
@@ -289,6 +291,10 @@ module.exports = {
 
 				const index_queries = this._index_sql_queries();
 				for ( const index_query of index_queries ) {
+					if ( options.debug ) {
+						console.log( index_query );
+					}
+
 					await pool.query( index_query );
 				}
 
