@@ -13,13 +13,13 @@ const RETRYABLE_ERROR_CODES = {
 	'57P03': true, // cannot_connect_now
 	'Error: Connection terminated unexpectedly': true
 };
-pg.Pool.prototype.___connect = pg.Pool.prototype.connect;
+pg.Pool.prototype._connect_original = pg.Pool.prototype.connect;
 pg.Pool.prototype.connect = function ( callback ) {
 	this.__retries = this.__retries ?? 0;
 	const max_retries = this.options.retries ?? 10;
 
 	try {
-		this.___connect( ( error, client ) => {
+		this._connect_original( ( error, client ) => {
 			if ( error && RETRYABLE_ERROR_CODES[ error.code ?? error ] && this.__retries < max_retries ) {
 				console.warn( `Error connecting to Postgres, retrying... (${ this.__retries + 1 })` );
 				this.__retries++;
@@ -357,6 +357,9 @@ module.exports = {
 			query: async function( query ) {
 				await this._init();
 				const pool = await this._pool.get();
+				if ( options.debug ) {
+					console.log( query );
+				}
 				const result = await pool.query( query );
 				return result;
 			},
