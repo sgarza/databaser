@@ -21,7 +21,8 @@ const User = model( {
 			primary: true
 		} ),
 		email: datatypes.email( {
-			initial: null
+			initial: null,
+			index: true // add a basic index for this column
 		} ),
 		name: {
 			first: datatypes.string( {

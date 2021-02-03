@@ -1322,4 +1322,54 @@ module.exports = async ( plaintest ) => {
 		await tests.close();
 		await other_tests_connection.close();
 	} );
+
+	group.test( 'should allow basic indexing', async () => {
+		const Indexed = model( {
+			name: 'indexed',
+			schema: {
+				id: datatypes.UUID( {
+					nullable: false,
+					unique: true,
+					primary: true
+				} ),
+				val: datatypes.integer( {
+					initial: 123,
+					index: true
+				} )
+			}
+		} );
+
+		const test_db = await databases.postgres.get( Indexed, {
+			db,
+			table: 'basic_indexing_test'
+		} );
+
+		const index_sql_queries = test_db._index_sql_queries();
+		assert.ok( Array.isArray( index_sql_queries ) );
+		assert.strictEqual( index_sql_queries?.length, 1 );
+
+		const test = Indexed.create( {
+			val: 456
+		} );
+		assert.strictEqual( test.val, 456 );
+
+		await test_db.put( test );
+
+		const found = ( await test_db.find( {
+			val: 456
+		} ) ).shift();
+		assert.ok( found );
+		assert.strictEqual( found.val, 456 );
+
+		const index_exists_results = await test_db.query( 'SELECT 1 FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace WHERE c.relname = \'basic_indexing_test_val_index\'' );
+		assert.ok( Array.isArray( index_exists_results?.rows ) );
+
+		const result = ( Array.isArray( index_exists_results?.rows ) ? index_exists_results.rows : [] ).shift();
+		assert.ok( result );
+
+		const value = Object.values( result ?? {} ).shift();
+		assert.strictEqual( value, 1 );
+
+		await test_db.close();
+	} );
 };

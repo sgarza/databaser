@@ -242,6 +242,18 @@ module.exports = {
 				return `CREATE TABLE IF NOT EXISTS ${ options.table } (${ clauses.join( ', ' ) });`;
 			},
 
+			_index_sql_queries: function() {
+				const columns_to_index = [];
+				traverse( model.options.schema ).forEach( function( field ) {
+					if ( typeof field === 'object' && !!field && field.datatype && field.options.stored !== false && field.options.index ) {
+						const key = options.column_name( this.path );
+						columns_to_index.push( key );
+					}
+				} );
+			
+				return columns_to_index.map( ( key ) => ( `CREATE INDEX CONCURRENTLY IF NOT EXISTS ${ `${ options.table }_${ key }_index` } ON ${ options.table } ( ${ key } );` ) );
+			},
+
 			_init: async function() {
 				if ( this._initialized ) {
 					return;
@@ -274,6 +286,12 @@ module.exports = {
 
 				const pool = await this._pool.get();
 				await pool.query( query );
+
+				const index_queries = this._index_sql_queries();
+				for ( const index_query of index_queries ) {
+					await pool.query( index_query );
+				}
+
 				this._initialized = true;
 				this._initializing = false;
 			},
