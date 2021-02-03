@@ -97,7 +97,6 @@ const User = model( {
 	console.log( `Found same user: ${ found_user && found_user.id === user.id }` );
 
 	const newest_user = await users_db.find( {}, {
-		limit: 1,
 		order: {
 			column: [ 'timestamps', 'created' ],
 			sort: 'desc'
@@ -106,13 +105,21 @@ const User = model( {
 	console.log( `Found newest user: ${ newest_user.id }` );
 
 	const first_email_user = await users_db.find( {}, {
-		limit: 1,
 		order: {
 			column: 'email',
 			sort: 'asc'
 		}
 	} );
 	console.log( `Found user with first lexical email: ${ first_email_user.id }` );
+
+	const users_named_john = await users_db.all( {
+		name: {
+			first: 'John'
+		}
+	}, {
+		limit: 100
+	} );
+	console.log( `Found ${ users_named_john.length } users named John.` );
 
 	await users_db.del( user.id );
 	console.log( 'Deleted user from db.' );

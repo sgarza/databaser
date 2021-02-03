@@ -257,13 +257,12 @@ module.exports = async ( plaintest ) => {
 
 		await users.put( user );
 
-		const stored_users = await users.find( {
+		const stored_user = await users.find( {
 			email: 'find@domain.com'
 		} );
 
-		assert.strictEqual( Array.isArray( stored_users ), true );
-		assert.strictEqual( Array.isArray( stored_users ) && stored_users.length, 1 );
-		assert.deepStrictEqual( Array.isArray( stored_users ) && stored_users.length && stored_users[ 0 ], user );
+		assert.ok( stored_user );
+		assert.deepStrictEqual( stored_user, user );
 
 		await users.close();
 	} );
@@ -294,7 +293,7 @@ module.exports = async ( plaintest ) => {
 
 		await users.put( user );
 
-		const stored_users = await users.find( {
+		const stored_users = await users.all( {
 			email: [
 				'foo@bar.com',
 				'find@domain.com',
@@ -334,7 +333,7 @@ module.exports = async ( plaintest ) => {
 			await counts.put( count );
 		}
 
-		const matching_counts_with_and = await counts.find( {
+		const matching_counts_with_and = await counts.all( {
 			count: {
 				and: [ {
 					comparison: '>',
@@ -350,7 +349,7 @@ module.exports = async ( plaintest ) => {
 		assert.strictEqual( Array.isArray( matching_counts_with_and ) && matching_counts_with_and.length, 5 ); // 3, 4, 5, 6, 7
 		assert.deepStrictEqual( Array.isArray( matching_counts_with_and ) && matching_counts_with_and.map( ( _count ) => ( _count.count ) ).sort(), [ 3, 4, 5, 6, 7 ] );
 
-		const matching_counts_with_or = await counts.find( {
+		const matching_counts_with_or = await counts.all( {
 			count: {
 				or: [ {
 					comparison: '<',
@@ -404,14 +403,14 @@ module.exports = async ( plaintest ) => {
 		const descending_created_users = [ ...created_users ].sort( ( lhs, rhs ) => -1 * lhs.created_at.localeCompare( rhs.created_at ) );
 		const ascending_created_users = [ ...created_users ].sort( ( lhs, rhs ) => lhs.created_at.localeCompare( rhs.created_at ) );
 
-		const descending_found_users = await users.find( {}, {
+		const descending_found_users = await users.all( {}, {
 			order: {
 				column: 'created_at',
 				sort: 'desc'
 			}
 		} );
 
-		const ascending_found_users = await users.find( {}, {
+		const ascending_found_users = await users.all( {}, {
 			order: {
 				column: 'created_at',
 				sort: 'asc'
@@ -464,14 +463,14 @@ module.exports = async ( plaintest ) => {
 		const descending_created_users = [ ...created_users ].sort( ( lhs, rhs ) => -1 * lhs.timestamps.created.localeCompare( rhs.timestamps.created ) );
 		const ascending_created_users = [ ...created_users ].sort( ( lhs, rhs ) => lhs.timestamps.created.localeCompare( rhs.timestamps.created ) );
 
-		const descending_found_users = await users.find( {}, {
+		const descending_found_users = await users.all( {}, {
 			order: {
 				column: [ 'timestamps', 'created' ],
 				sort: 'desc'
 			}
 		} );
 
-		const ascending_found_users = await users.find( {}, {
+		const ascending_found_users = await users.all( {}, {
 			order: {
 				column: [ 'timestamps', 'created' ],
 				sort: 'asc'
@@ -1355,9 +1354,9 @@ module.exports = async ( plaintest ) => {
 
 		await test_db.put( test );
 
-		const found = ( await test_db.find( {
+		const found = await test_db.find( {
 			val: 456
-		} ) ).shift();
+		} );
 		assert.ok( found );
 		assert.strictEqual( found.val, 456 );
 

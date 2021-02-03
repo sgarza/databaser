@@ -453,7 +453,15 @@ module.exports = {
 				return deleted;
 			},
 
-			find: async function( criteria, _find_options = {} ) {
+			find: async function( criteria, _options = {} ) {
+				const query_options = deepmerge( _options, {
+					limit: 1
+				} );
+				const results = await this.all( criteria, query_options );
+				return results.shift();
+			},
+
+			all: async function( criteria, _options = {} ) {
 				await this._init();
 
 				const clauses = [];
@@ -516,16 +524,16 @@ module.exports = {
 					}
 				}
 
-				const find_options = deepmerge( {
+				const query_options = deepmerge( {
 					limit: 10,
 					offset: 0,
 					order: {
 						column: null,
 						sort: 'desc'
 					}
-				}, _find_options );
+				}, _options );
 
-				const ordering = find_options.order.column !== null ? `ORDER BY ${ Array.isArray( find_options.order.column ) ? options.column_name( find_options.order.column ) : find_options.order.column } ${ find_options.order.sort }` : '';
+				const ordering = query_options.order.column !== null ? `ORDER BY ${ Array.isArray( query_options.order.column ) ? options.column_name( query_options.order.column ) : query_options.order.column } ${ query_options.order.sort }` : '';
 
 				const query = [
 					`SELECT * FROM ${ options.table } ${ clauses.length ? `WHERE ${ clauses.join( ' AND ' ) }` : '' }`,
@@ -540,7 +548,7 @@ module.exports = {
 				}
 
 				const pool = await this._pool.get();
-				const result = await pool.query( query, values.concat( [ find_options.limit, find_options.offset ] ) );
+				const result = await pool.query( query, values.concat( [ query_options.limit, query_options.offset ] ) );
 				const results = [];
 				for ( const row of result.rows ) {
 					results.push( await this._deserialize( row ) );
