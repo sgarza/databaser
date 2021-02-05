@@ -190,7 +190,8 @@ module.exports = {
 			serializers: {},
 			deserializers: {},
 			column_name: ( path ) => ( path.join( '__' ) ),
-			primary_key: null
+			primary_key: null,
+			concurrent_indexing: false
 		}, _options );
 
 		if ( !options.primary_key ) {
@@ -253,7 +254,7 @@ module.exports = {
 					}
 				} );
 			
-				return columns_to_index.map( ( key ) => ( `CREATE INDEX CONCURRENTLY IF NOT EXISTS ${ `${ options.table }_${ key }_index` } ON ${ options.table } ( ${ key } );` ) );
+				return columns_to_index.map( ( key ) => ( `CREATE INDEX ${ options.concurrent_indexing ? 'CONCURRENTLY' : '' } IF NOT EXISTS ${ `${ options.table }_${ key }_index` } ON ${ options.table } ( ${ key } );` ) );
 			},
 
 			_init: async function() {
