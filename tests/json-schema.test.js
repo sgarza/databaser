@@ -11,7 +11,8 @@ module.exports = async ( plaintest ) => {
 			name: 'user',
 			schema: {
 				id: datatypes.UUID( {
-					nullable: false
+					nullable: false,
+					description: 'User ID'
 				} ),
 				active: datatypes.boolean(),
 				email: datatypes.email(),
@@ -83,7 +84,8 @@ module.exports = async ( plaintest ) => {
 					maxLength: 36,
 					example: '8bb846ee-a778-4378-9635-34b54956675d',
 					format: 'uuid',
-					nullable: false
+					nullable: false,
+					description: 'User ID'
 				},
 				active: {
 					type: 'boolean',

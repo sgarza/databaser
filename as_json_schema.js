@@ -5,60 +5,132 @@ const traverse = require( 'traverse' );
 // String values MUST be one of the six primitive types ("null", "boolean", "object", "array", "number", or "string"), or "integer" which matches any number with a zero fractional part. 
 
 const DATATYPE_MAP = {
-	boolean: ( field ) => ( {
-		type: 'boolean',
-		example: field.options.example,
-		nullable: field.options.nullable
-	} ),
-	date: ( field ) => ( {
-		type: 'string',
-		format: 'date',
-		minLength: field.options.length.min,
-		maxLength: field.options.length.max,
-		nullable: field.options.nullable,
-		example: field.options.example
-	} ),
-	email: ( field ) => ( {
-		type: 'string',
-		format: 'email',
-		minLength: field.options.length.min,
-		example: field.options.example,
-		nullable: field.options.nullable
-	} ),
-	enum: ( field ) => ( {
-		type: 'string',
-		enum: field.options.values,
-		example: field.options.example,
-		nullable: field.options.nullable
-	} ),
-	integer: ( field ) => ( {
-		type: 'integer',
-		example: field.options.example,
-		nullable: field.options.nullable
-	} ),
-	ISODate: ( field ) => ( {
-		type: 'string',
-		format: 'date-time',
-		example: field.options.example,
-		nullable: field.options.nullable
-	} ),
-	JSON: ( field ) => ( {
-		type: field.options.type ?? 'object',
-		example: field.options.example,
-		nullable: field.options.nullable,
-		additionalProperties: true
-	} ),
-	number: ( field ) => ( {
-		type: 'number',
-		example: field.options.example,
-		nullable: field.options.nullable
-	} ),
-	phone: ( field ) => ( {
-		type: 'string',
-		maxLength: field.options.length.max,
-		example: field.options.example,
-		nullable: field.options.nullable
-	} ),
+	boolean: ( field ) => {
+		const schema = {
+			type: 'boolean',
+			example: field.options.example,
+			nullable: field.options.nullable
+		};
+
+		if ( typeof field.options.description === 'string' ) {
+			schema.description = field.options.description;
+		}
+
+		return schema;
+	},
+	date: ( field ) => {
+		const schema = {
+			type: 'string',
+			format: 'date',
+			minLength: field.options.length.min,
+			maxLength: field.options.length.max,
+			nullable: field.options.nullable,
+			example: field.options.example
+		};
+
+		if ( typeof field.options.description === 'string' ) {
+			schema.description = field.options.description;
+		}
+
+		return schema;
+	},
+	email: ( field ) => {
+		const schema = {
+			type: 'string',
+			format: 'email',
+			minLength: field.options.length.min,
+			example: field.options.example,
+			nullable: field.options.nullable
+		};
+
+		if ( typeof field.options.description === 'string' ) {
+			schema.description = field.options.description;
+		}
+
+		return schema;
+	},
+	enum: ( field ) => {
+		const schema = {
+			type: 'string',
+			enum: field.options.values,
+			example: field.options.example,
+			nullable: field.options.nullable
+		};
+
+		if ( typeof field.options.description === 'string' ) {
+			schema.description = field.options.description;
+		}
+
+		return schema;
+	},
+	integer: ( field ) => {
+		const schema = {
+			type: 'integer',
+			example: field.options.example,
+			nullable: field.options.nullable
+		};
+
+		if ( typeof field.options.description === 'string' ) {
+			schema.description = field.options.description;
+		}
+
+		return schema;
+	},
+	ISODate: ( field ) => {
+		const schema = {
+			type: 'string',
+			format: 'date-time',
+			example: field.options.example,
+			nullable: field.options.nullable
+		};
+
+		if ( typeof field.options.description === 'string' ) {
+			schema.description = field.options.description;
+		}
+
+		return schema;
+	},
+	JSON: ( field ) => {
+		const schema = {
+			type: field.options.type ?? 'object',
+			example: field.options.example,
+			nullable: field.options.nullable,
+			additionalProperties: true
+		};
+
+		if ( typeof field.options.description === 'string' ) {
+			schema.description = field.options.description;
+		}
+
+		return schema;
+	},
+	number: ( field ) => {
+		const schema = {
+			type: 'number',
+			example: field.options.example,
+			nullable: field.options.nullable
+		};
+
+		if ( typeof field.options.description === 'string' ) {
+			schema.description = field.options.description;
+		}
+
+		return schema;
+	},
+	phone: ( field ) => {
+		const schema = {
+			type: 'string',
+			maxLength: field.options.length.max,
+			example: field.options.example,
+			nullable: field.options.nullable
+		};
+
+		if ( typeof field.options.description === 'string' ) {
+			schema.description = field.options.description;
+		}
+
+		return schema;
+	},
 	string: ( field ) => {
 		const schema = {
 			type: 'string',
@@ -74,16 +146,28 @@ const DATATYPE_MAP = {
 			schema.maxLength = field.options.length.max;
 		}
 
+		if ( typeof field.options.description === 'string' ) {
+			schema.description = field.options.description;
+		}
+
 		return schema;
 	},
-	UUID: ( field ) => ( {
-		type: 'string',
-		format: 'uuid',
-		minLength: 36,
-		maxLength: 36,
-		example: field.options.example,
-		nullable: field.options.nullable
-	} )
+	UUID: ( field ) => {
+		const schema = {
+			type: 'string',
+			format: 'uuid',
+			minLength: 36,
+			maxLength: 36,
+			example: field.options.example,
+			nullable: field.options.nullable
+		};
+
+		if ( typeof field.options.description === 'string' ) {
+			schema.description = field.options.description;
+		}
+
+		return schema;
+	}
 };
 
 function property_map( value ) {
