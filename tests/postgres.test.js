@@ -1414,13 +1414,13 @@ module.exports = async ( plaintest ) => {
 		const no_params_result = ( Array.isArray( query_without_params_result?.rows ) ? query_without_params_result.rows : [] ).shift();
 		assert.strictEqual( no_params_result?.count, '1' );
 
-		const query_with_params_result = await test_db.query( 'SELECT count(*) from query_params_test where val = $1;', 123 );
+		const query_with_params_result = await test_db.query( 'SELECT count(*) from query_params_test where val = $1;', [ 123 ] );
 		assert.ok( query_with_params_result );
 		assert.ok( Array.isArray( query_with_params_result?.rows ) );
 		const wrong_value_result = ( Array.isArray( query_with_params_result?.rows ) ? query_with_params_result.rows : [] ).shift();
 		assert.strictEqual( wrong_value_result?.count, '0' );
 
-		const correct_query_with_params_result = await test_db.query( 'SELECT count(*) from query_params_test where val = $1 and id = $2;', 456, test.id );
+		const correct_query_with_params_result = await test_db.query( 'SELECT count(*) from query_params_test where val = $1 and id = $2;', [ 456, test.id ] );
 		assert.ok( correct_query_with_params_result );
 		assert.ok( Array.isArray( correct_query_with_params_result?.rows ) );
 		const correct_value_result = ( Array.isArray( correct_query_with_params_result?.rows ) ? correct_query_with_params_result.rows : [] ).shift();

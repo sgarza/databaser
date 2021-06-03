@@ -355,13 +355,13 @@ module.exports = {
 				return this._pool.connected;
 			},
 
-			query: async function( query, ...params ) {
+			query: async function( query, values = [] ) {
 				await this._init();
 				const pool = await this._pool.get();
 				if ( options.debug ) {
-					console.log( `query: ${ query }\n params: ${ params }` );
+					console.log( `query: ${ query }\n values: ${ values }` );
 				}
-				const result = await pool.query( query, params );
+				const result = await pool.query( query, values );
 				return result;
 			},
 
