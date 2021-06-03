@@ -1373,4 +1373,59 @@ module.exports = async ( plaintest ) => {
 
 		await test_db.close();
 	} );
+
+	group.test( 'should allow passing params to .query()', async () => {
+		const Queryable = model( {
+			name: 'query_params',
+			schema: {
+				id: datatypes.UUID( {
+					nullable: false,
+					unique: true,
+					primary: true
+				} ),
+				val: datatypes.integer( {
+					initial: 123,
+					index: true
+				} )
+			}
+		} );
+
+		const test_db = await databases.postgres.get( Queryable, {
+			db,
+			table: 'query_params_test'
+		} );
+
+		const test = Queryable.create( {
+			val: 456
+		} );
+		assert.strictEqual( test.val, 456 );
+
+		await test_db.put( test );
+
+		const found = await test_db.find( {
+			val: 456
+		} );
+		assert.ok( found );
+		assert.strictEqual( found.val, 456 );
+
+		const query_without_params_result = await test_db.query( 'SELECT count(*) from query_params_test;' );
+		assert.ok( query_without_params_result );
+		assert.ok( Array.isArray( query_without_params_result?.rows ) );
+		const no_params_result = ( Array.isArray( query_without_params_result?.rows ) ? query_without_params_result.rows : [] ).shift();
+		assert.strictEqual( no_params_result?.count, '1' );
+
+		const query_with_params_result = await test_db.query( 'SELECT count(*) from query_params_test where val = $1;', 123 );
+		assert.ok( query_with_params_result );
+		assert.ok( Array.isArray( query_with_params_result?.rows ) );
+		const wrong_value_result = ( Array.isArray( query_with_params_result?.rows ) ? query_with_params_result.rows : [] ).shift();
+		assert.strictEqual( wrong_value_result?.count, '0' );
+
+		const correct_query_with_params_result = await test_db.query( 'SELECT count(*) from query_params_test where val = $1 and id = $2;', 456, test.id );
+		assert.ok( correct_query_with_params_result );
+		assert.ok( Array.isArray( correct_query_with_params_result?.rows ) );
+		const correct_value_result = ( Array.isArray( correct_query_with_params_result?.rows ) ? correct_query_with_params_result.rows : [] ).shift();
+		assert.strictEqual( correct_value_result?.count, '1' );
+
+		await test_db.close();
+	} );
 };
