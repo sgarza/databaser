@@ -525,9 +525,10 @@ module.exports = {
 								}
 							}
 							else {
-								clauses.push( `${ column_name } = $${ values.length + 1 }` );
 								const serializer = options.serializers[ column_name ] || DATATYPE_SERIALIZERS[ field.datatype ];
 								const serialized_value = serializer ? await serializer( value ) : value;
+
+								clauses.push( `${ column_name } ${ serialized_value === null ? 'IS NULL' : `= $${ values.length + 1 }` }` );
 								values.push( serialized_value );
 							}
 						}
@@ -544,21 +545,22 @@ module.exports = {
 				}, _options );
 
 				const ordering = query_options.order.column !== null ? `ORDER BY ${ Array.isArray( query_options.order.column ) ? options.column_name( query_options.order.column ) : query_options.order.column } ${ query_options.order.sort }` : '';
+				const filtered_values = values.filter( ( value ) => ( value !== null ) );
 
 				const query = [
 					`SELECT * FROM ${ options.table } ${ clauses.length ? `WHERE ${ clauses.join( ' AND ' ) }` : '' }`,
 					ordering,
-					`LIMIT $${ values.length + 1 }`,
-					`OFFSET $${ values.length + 2 }`
+					`LIMIT $${ filtered_values.length + 1 }`,
+					`OFFSET $${ filtered_values.length + 2 }`
 				].join( ' ' );
 
 				if ( options.debug ) {
 					console.log( query );
-					console.log( values );
+					console.log( filtered_values );
 				}
 
 				const pool = await this._pool.get();
-				const result = await pool.query( query, values.concat( [ query_options.limit, query_options.offset ] ) );
+				const result = await pool.query( query, filtered_values.concat( [ query_options.limit, query_options.offset ] ) );
 				const results = [];
 				for ( const row of result.rows ) {
 					results.push( await this._deserialize( row ) );

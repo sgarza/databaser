@@ -310,6 +310,48 @@ module.exports = async ( plaintest ) => {
 		await users.close();
 	} );
 
+	group.test( 'should find a model instance with when searching for a null value', async () => {
+		const User = model( {
+			name: 'user',
+			schema: {
+				id: datatypes.UUID( {
+					nullable: false,
+					unique: true,
+					primary: true
+				} ),
+				email: datatypes.email( {
+					initial: null
+				} )
+			}
+		} );
+
+		const users = await databases.postgres.get( User, {
+			db,
+			table: 'users_find_by_null'
+		} );
+
+		for ( let i = 0; i < 5; ++i ) {
+			const user = User.create( {} );
+			await users.put( user );
+		}
+
+		for ( let i = 0; i < 5; ++i ) {
+			const user = User.create( {
+				email: `${ i }@test.com`
+			} );
+			await users.put( user );
+		}
+
+		const null_email_users = await users.all( {
+			email: null
+		} );
+
+		assert.strictEqual( Array.isArray( null_email_users ), true );
+		assert.strictEqual( null_email_users?.length, 5 );
+
+		await users.close();
+	} );
+
 	group.test( 'should find a model instance with advanced query on a value', async () => {
 		const Count = model( {
 			name: 'count',
