@@ -490,14 +490,24 @@ module.exports = {
 							const value = criteria_traverser.get( path );
 
 							if ( Array.isArray( value ) ) {
-								const or_clauses = [];
-								for ( let i = 0; i < value.length; ++i ) {
-									or_clauses.push( `${ column_name } = $${ values.length + 1 }` );
-									const serializer = options.serializers[ column_name ] || DATATYPE_SERIALIZERS[ field.datatype ];
-									const serialized_value = serializer ? await serializer( value[ i ] ) : value[ i ];
-									values.push( serialized_value );
+								const types = value.reduce( ( _types, _value ) => {
+									_types[ typeof _value ] = true;
+									return _types;
+								}, {} );
+
+								if ( Object.keys( types ).length !== 1 ) {
+									throw new Error( 'mixed types passed in array comparator' );
 								}
-								clauses.push( `( ${ or_clauses.join( ' OR ' ) } )` );
+
+								const mapper = DATATYPE_MAP[ field.datatype ];
+								if ( !mapper ) {
+									throw new Error( `Unknown datatype: ${ field.datatype }` );
+								}
+		
+								const type = options.column_type_overrides[ column_name ] ? options.column_type_overrides[ column_name ] : mapper( field );
+
+								clauses.push( `${ column_name } = ANY($${ values.length + 1 }::${ type }[])` );
+								values.push( value );
 							}
 							else if ( typeof value === 'object' && value !== null ) {
 								if ( value.and ) {

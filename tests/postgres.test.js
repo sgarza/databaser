@@ -269,7 +269,7 @@ module.exports = async ( plaintest ) => {
 		await users.close();
 	} );
 
-	group.test( 'should find a model instance with multiple options for a value (SQL OR clause)', async () => {
+	group.test( 'should find a model instance with multiple options for a value', async () => {
 		const User = model( {
 			name: 'user',
 			schema: {
@@ -290,7 +290,8 @@ module.exports = async ( plaintest ) => {
 
 		const users = await databases.postgres.get( User, {
 			db,
-			table: 'users_find_array'
+			table: 'users_find_array',
+			debug: false
 		} );
 
 		await users.put( user );
