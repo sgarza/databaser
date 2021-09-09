@@ -1471,4 +1471,60 @@ module.exports = async ( plaintest ) => {
 
 		await test_db.close();
 	} );
+
+	group.test( 'should allow processing matching objects', async () => {
+		const User = model( {
+			name: 'user',
+			schema: {
+				id: datatypes.UUID( {
+					nullable: false,
+					unique: true,
+					primary: true
+				} ),
+				should_be_processed: datatypes.boolean( {
+					initial: () => ( Math.random() > 0.5 )
+				} ),
+				processed: datatypes.boolean( {
+					initial: false
+				} )
+			}
+		} );
+
+		const users = await databases.postgres.get( User, {
+			db,
+			table: 'processing'
+		} );
+
+		for ( let i = 0; i < 250; ++i ) {
+			const user = User.create( {} );
+			await users.put( user );
+		}
+
+		await users.process( {
+			should_be_processed: true
+		}, async ( user ) => {
+			user.processed = true;
+			await users.put( user );
+		} );
+
+		const users_that_should_have_been_processed = await users.all( {
+			should_be_processed: true
+		}, {
+			limit: 250
+		} );
+
+		const all_users_that_should_have_been_processed_were_processed = users_that_should_have_been_processed.every( ( user ) => ( user.processed ) );
+		assert.strictEqual( all_users_that_should_have_been_processed_were_processed, true );
+
+		const users_that_should_not_have_been_processed = await users.all( {
+			should_be_processed: false
+		}, {
+			limit: 250
+		} );
+
+		const all_users_that_should_not_have_been_processed_were_not_processed = users_that_should_not_have_been_processed.every( ( user ) => ( !user.processed ) );
+		assert.strictEqual( all_users_that_should_not_have_been_processed_were_not_processed, true );
+
+		await users.close();
+	} );
 };

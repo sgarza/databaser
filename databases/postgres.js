@@ -6,6 +6,8 @@ const pg = require( 'pg' );
 const pluralize = require( 'pluralize' );
 const traverse = require( 'traverse' );
 
+const PROCESS_BATCH_SIZE = 100;
+
 // TODO: remove this if https://github.com/brianc/node-postgres/issues/1789 is fixed
 const RETRYABLE_ERROR_CODES = {
 	'ECONNREFUSED': true, // connection refused
@@ -576,6 +578,27 @@ module.exports = {
 					results.push( await this._deserialize( row ) );
 				}
 				return results;
+			},
+
+			process: async function( criteria, process ) {
+				let offset = 0;
+				let results;
+				do {
+					results = await this.all( criteria, {
+						limit: PROCESS_BATCH_SIZE,
+						offset,
+						order: {
+							column: options.primary_key,
+							sort: 'asc'
+						}
+					} );
+
+					offset += results.length;
+
+					for ( const result of results ) {
+						await process( result );
+					}
+				} while( results?.length === PROCESS_BATCH_SIZE );
 			},
 
 			open: async function() {
