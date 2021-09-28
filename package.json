@@ -1,6 +1,6 @@
 {
   "name": "databaser",
-  "version": "7.5.0",
+  "version": "7.6.0",
   "description": "database thing",
   "main": "index.js",
   "scripts": {
@@ -15,7 +15,7 @@
     "tap-spec": "^5.0.0"
   },
   "dependencies": {
-    "date-fns": "^2.23.0",
+    "date-fns": "^2.24.0",
     "deepmerge": "^4.2.2",
     "pg": "^8.7.1",
     "pluralize": "^8.0.0",

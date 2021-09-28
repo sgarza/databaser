@@ -368,7 +368,8 @@ module.exports = async ( plaintest ) => {
 
 		const counts = await databases.postgres.get( Count, {
 			db,
-			table: 'count_find_advanced'
+			table: 'count_find_advanced',
+			debug: false
 		} );
 
 		for ( let i = 0; i < 10; ++i ) {
@@ -410,7 +411,89 @@ module.exports = async ( plaintest ) => {
 		assert.strictEqual( Array.isArray( matching_counts_with_or ) && matching_counts_with_or.length, 3 ); // 0, 1, 9
 		assert.deepStrictEqual( Array.isArray( matching_counts_with_or ) && matching_counts_with_or.map( ( _count ) => ( _count.count ) ).sort(), [ 0, 1, 9 ] );
 
+		const matching_counts_with_not_scalar = await counts.all( {
+			count: {
+				not: 5
+			}
+		} );
+
+		assert.strictEqual( Array.isArray( matching_counts_with_not_scalar ), true );
+		assert.strictEqual( Array.isArray( matching_counts_with_not_scalar ) && matching_counts_with_not_scalar.length, 9 ); // 0, 1, 2, 3, 4, 6, 7, 8, 9
+		assert.deepStrictEqual( Array.isArray( matching_counts_with_not_scalar ) && matching_counts_with_not_scalar.map( ( _count ) => ( _count.count ) ).sort(), [ 0, 1, 2, 3, 4, 6, 7, 8, 9 ] );
+
+		const matching_counts_with_not_array = await counts.all( {
+			count: {
+				not: [ 1, 3, 5, 7, 9 ]
+			}
+		} );
+
+		assert.strictEqual( Array.isArray( matching_counts_with_not_array ), true );
+		assert.strictEqual( Array.isArray( matching_counts_with_not_array ) && matching_counts_with_not_array.length, 5 ); // 0, 2, 4, 6, 8
+		assert.deepStrictEqual( Array.isArray( matching_counts_with_not_array ) && matching_counts_with_not_array.map( ( _count ) => ( _count.count ) ).sort(), [ 0, 2, 4, 6, 8 ] );
+
 		await counts.close();
+	} );
+
+	group.test( 'should find a model instance with advanced query on a value', async () => {
+		const Value = model( {
+			name: 'nulls',
+			schema: {
+				id: datatypes.UUID( {
+					nullable: false,
+					unique: true,
+					primary: true
+				} ),
+				value: datatypes.string( {
+					initial: null
+				} )
+			}
+		} );
+
+		const values = await databases.postgres.get( Value, {
+			db,
+			table: 'nulls',
+			debug: false
+		} );
+
+		for ( let i = 0; i < 10; ++i ) {
+			const value = Value.create( {
+				value: i % 2 === 0 ? null : `${ i }`
+			} );
+			await values.put( value );
+		}
+
+		const matching_nulls = await values.all( {
+			value: null
+		} );
+
+		assert.strictEqual( Array.isArray( matching_nulls ), true );
+		assert.strictEqual( Array.isArray( matching_nulls ) && matching_nulls.length, 5 );
+		assert.deepStrictEqual( Array.isArray( matching_nulls ) && matching_nulls.map( ( _null ) => ( _null.value ) ).sort(), [ null, null, null, null, null ] );
+
+		const matching_not_nulls = await values.all( {
+			value: {
+				not: null
+			}
+		} );
+
+		assert.strictEqual( Array.isArray( matching_not_nulls ), true );
+		assert.strictEqual( Array.isArray( matching_not_nulls ) && matching_not_nulls.length, 5 );
+		assert.deepStrictEqual( Array.isArray( matching_not_nulls ) && matching_not_nulls.map( ( _not_null ) => ( _not_null.value ) ).sort(), [ '1', '3', '5', '7', '9' ] );
+
+		try {
+			await values.all( {
+				value: {
+					not: [ null, 1, 2, 3 ]
+				}
+			} );
+	
+			assert.fail( 'allowed passing null in an array of not values' );
+		}
+		catch ( error ) {
+			assert.strictEqual( error?.toString(), 'Error: cannot include null in array of values with not' );
+		}
+
+		await values.close();
 	} );
 
 	group.test( 'should sort multiple results properly', async () => {

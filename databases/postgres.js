@@ -490,6 +490,10 @@ module.exports = {
 						if ( typeof input !== 'undefined' ) {
 							const column_name = options.column_name( path );
 							const value = criteria_traverser.get( path );
+							const mapper = DATATYPE_MAP[ field.datatype ];
+							if ( !mapper ) {
+								throw new Error( `Unknown datatype: ${ field.datatype }` );
+							}
 
 							if ( Array.isArray( value ) ) {
 								const types = value.reduce( ( _types, _value ) => {
@@ -501,14 +505,7 @@ module.exports = {
 									throw new Error( 'mixed types passed in array comparator' );
 								}
 
-								const mapper = DATATYPE_MAP[ field.datatype ];
-								if ( !mapper ) {
-									throw new Error( `Unknown datatype: ${ field.datatype }` );
-								}
-		
-								const type = options.column_type_overrides[ column_name ] ? options.column_type_overrides[ column_name ] : mapper( field );
-
-								clauses.push( `${ column_name } = ANY($${ values.length + 1 }::${ type }[])` );
+								clauses.push( `${ column_name } = ANY ( $${ values.length + 1 } )` );
 								values.push( value );
 							}
 							else if ( typeof value === 'object' && value !== null ) {
@@ -534,6 +531,22 @@ module.exports = {
 										values.push( serialized_value );
 									}
 									clauses.push( `( ${ or_clauses.join( ' OR ' ) } )` );
+								}
+
+								if ( typeof value.not !== 'undefined' ) {
+									if ( value.not === null ) {
+										clauses.push( `${ column_name } IS NOT NULL` );
+									}
+									else {
+										const nots = Array.isArray( value.not ) ? value.not : [ value.not ];
+										
+										if ( nots.includes( null ) ) {
+											throw new Error( 'cannot include null in array of values with not' );
+										}
+
+										clauses.push( `${ column_name } <> ALL ( $${ values.length + 1 } )` );
+										values.push( nots );
+									}
 								}
 							}
 							else {
