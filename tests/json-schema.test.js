@@ -260,4 +260,24 @@ module.exports = async ( plaintest ) => {
 			}
 		} );
 	} );
+
+	group.test( 'should return a copy', () => {
+		const simple_model = model( {
+			name: 'simple',
+			schema: {
+				id: datatypes.UUID( {
+					nullable: false,
+					description: 'User ID'
+				} )
+			}
+		} );
+		
+		const first = as_json_schema( simple_model );
+
+		delete first.properties.id;
+
+		const second = as_json_schema( simple_model );
+
+		assert.ok( second.properties.id );
+	} );
 };

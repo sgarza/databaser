@@ -1,5 +1,6 @@
 'use strict';
 
+const deepmerge = require( 'deepmerge' );
 const traverse = require( 'traverse' );
 
 const CACHE = {};
@@ -240,5 +241,5 @@ module.exports = ( model, options = { nullable: false } ) => {
 
 	CACHE[ key ] = schema;
 
-	return schema;
+	return deepmerge( {}, schema );
 };
