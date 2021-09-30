@@ -208,4 +208,56 @@ module.exports = async ( plaintest ) => {
 			}
 		} );
 	} );
+
+	group.test( 'should handle nullable', () => {
+		const simple_model = model( {
+			name: 'simple',
+			schema: {
+				id: datatypes.UUID( {
+					nullable: false,
+					description: 'User ID'
+				} )
+			}
+		} );
+		
+		const non_nullable = as_json_schema( simple_model );
+
+		assert.deepStrictEqual( non_nullable, {
+			type: 'object',
+			description: 'simple',
+			required: [ 'id' ],
+			properties: {
+				id: {
+					type: 'string',
+					minLength: 36,
+					maxLength: 36,
+					example: '8bb846ee-a778-4378-9635-34b54956675d',
+					format: 'uuid',
+					nullable: false,
+					description: 'User ID'
+				}
+			}
+		} );
+
+		const nullable = as_json_schema( simple_model, {
+			nullable: true
+		} );
+
+		assert.deepStrictEqual( nullable, {
+			type: [ 'object', 'null' ],
+			description: 'simple',
+			required: [ 'id' ],
+			properties: {
+				id: {
+					type: 'string',
+					minLength: 36,
+					maxLength: 36,
+					example: '8bb846ee-a778-4378-9635-34b54956675d',
+					format: 'uuid',
+					nullable: false,
+					description: 'User ID'
+				}
+			}
+		} );
+	} );
 };

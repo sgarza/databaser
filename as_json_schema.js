@@ -223,14 +223,9 @@ function property_map( value ) {
 	this.update( value );
 }
 
-module.exports = ( model ) => {
-	let schema = CACHE[ model.options.name ];
-	if ( schema ) {
-		return schema;
-	}
-
-	const first_pass_schema = traverse( model.options.schema ).map( property_map );
-	schema = traverse( first_pass_schema ).map( function() { 
+module.exports = ( model, options = { nullable: false } ) => {
+	const key = `${ model.options.name }:${ options.nullable }`;
+	const schema = CACHE[ key ] ?? traverse( traverse( model.options.schema ).map( property_map ) ).map( function() { 
 		const name = this.path[ this.path.length - 1 ];
 		if ( name === '__processed' ) {
 			this.remove();
@@ -238,6 +233,12 @@ module.exports = ( model ) => {
 	} );
 
 	schema.description = model.options.name;
+
+	if ( options.nullable ) {
+		schema.type = [ 'object', 'null' ];
+	}
+
+	CACHE[ key ] = schema;
 
 	return schema;
 };
