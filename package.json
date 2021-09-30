@@ -1,6 +1,6 @@
 {
   "name": "databaser",
-  "version": "7.6.0",
+  "version": "7.7.0",
   "description": "database thing",
   "main": "index.js",
   "scripts": {

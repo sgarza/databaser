@@ -2,6 +2,8 @@
 
 const traverse = require( 'traverse' );
 
+const CACHE = {};
+
 // String values MUST be one of the six primitive types ("null", "boolean", "object", "array", "number", or "string"), or "integer" which matches any number with a zero fractional part. 
 
 const DATATYPE_MAP = {
@@ -222,8 +224,13 @@ function property_map( value ) {
 }
 
 module.exports = ( model ) => {
+	let schema = CACHE[ model.options.name ];
+	if ( schema ) {
+		return schema;
+	}
+
 	const first_pass_schema = traverse( model.options.schema ).map( property_map );
-	const schema = traverse( first_pass_schema ).map( function() { 
+	schema = traverse( first_pass_schema ).map( function() { 
 		const name = this.path[ this.path.length - 1 ];
 		if ( name === '__processed' ) {
 			this.remove();
