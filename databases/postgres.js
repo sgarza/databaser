@@ -532,6 +532,13 @@ module.exports = {
 									}
 									clauses.push( `( ${ or_clauses.join( ' OR ' ) } )` );
 								}
+								
+								if ( value.comparison ) {
+									clauses.push( `${ column_name } ${ value.comparison } $${ values.length + 1 }` );
+									const serializer = options.serializers[ column_name ] || DATATYPE_SERIALIZERS[ field.datatype ];
+									const serialized_value = serializer ? await serializer( value.value ) : value.value;
+									values.push( serialized_value );
+								}
 
 								if ( typeof value.not !== 'undefined' ) {
 									if ( value.not === null ) {

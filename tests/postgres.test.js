@@ -431,6 +431,17 @@ module.exports = async ( plaintest ) => {
 		assert.strictEqual( Array.isArray( matching_counts_with_not_array ) && matching_counts_with_not_array.length, 5 ); // 0, 2, 4, 6, 8
 		assert.deepStrictEqual( Array.isArray( matching_counts_with_not_array ) && matching_counts_with_not_array.map( ( _count ) => ( _count.count ) ).sort(), [ 0, 2, 4, 6, 8 ] );
 
+		const matching_counts_with_value_comparison = await counts.all( {
+			count: {
+				comparison: '>',
+				value: 5
+			}
+		} );
+
+		assert.strictEqual( Array.isArray( matching_counts_with_value_comparison ), true );
+		assert.strictEqual( Array.isArray( matching_counts_with_value_comparison ) && matching_counts_with_value_comparison.length, 4 ); // 6, 7, 8, 9
+		assert.deepStrictEqual( Array.isArray( matching_counts_with_value_comparison ) && matching_counts_with_value_comparison.map( ( _count ) => ( _count.count ) ).sort(), [ 6, 7, 8, 9 ] );
+
 		await counts.close();
 	} );
 
