@@ -1334,6 +1334,47 @@ module.exports = async ( plaintest ) => {
 		await users.close();
 	} );
 
+	group.test( 'should allow querying json fields with .where()', async () => {
+		const JSONObject = model( {
+			name: 'jsonobject',
+			schema: {
+				id: datatypes.UUID( {
+					nullable: false,
+					unique: true,
+					primary: true
+				} ),
+				val: datatypes.JSON( {
+					initial: {}
+				} )
+			}
+		} );
+
+		const jsonobjects = await databases.postgres.get( JSONObject, {
+			db,
+			table: 'jsonobjects_where',
+			debug: false
+		} );
+
+		for ( let i = 0; i < 10; ++i ) {
+			const jsonobject = JSONObject.create( {
+				val: {
+					i
+				}
+			} );
+	
+			await jsonobjects.put( jsonobject );
+		}
+
+		const found = await jsonobjects.where( {
+			query: '( val->>\'i\' )::integer >= 5'
+		} );
+
+		assert.strictEqual( Array.isArray( found ), true );
+		assert.strictEqual( found?.length, 5 );
+
+		await jsonobjects.close();
+	} );
+
 	group.test( 'should allow locking', async () => {
 		const TestModel = model( {
 			name: 'lock_test',
