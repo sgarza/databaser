@@ -456,6 +456,9 @@ module.exports = async ( plaintest ) => {
 				} ),
 				value: datatypes.string( {
 					initial: null
+				} ),
+				other_value: datatypes.string( {
+					initial: 'other'
 				} )
 			}
 		} );
@@ -490,6 +493,18 @@ module.exports = async ( plaintest ) => {
 		assert.strictEqual( Array.isArray( matching_not_nulls ), true );
 		assert.strictEqual( Array.isArray( matching_not_nulls ) && matching_not_nulls.length, 5 );
 		assert.deepStrictEqual( Array.isArray( matching_not_nulls ) && matching_not_nulls.map( ( _not_null ) => ( _not_null.value ) ).sort(), [ '1', '3', '5', '7', '9' ] );
+
+		// we ensure we can pass another value while searching for nulls
+		// to avoid a regression around a null value causing an off-by-one
+		// with substitutions
+		const matching_mixed = await values.all( {
+			value: null,
+			other_value: 'other'
+		} );
+
+		assert.strictEqual( Array.isArray( matching_mixed ), true );
+		assert.strictEqual( Array.isArray( matching_mixed ) && matching_mixed.length, 5 );
+		assert.deepStrictEqual( Array.isArray( matching_mixed ) && matching_mixed.map( ( _null ) => ( _null.value ) ).sort(), [ null, null, null, null, null ] );
 
 		try {
 			await values.all( {

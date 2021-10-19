@@ -561,7 +561,10 @@ module.exports = {
 								const serialized_value = serializer ? await serializer( value ) : value;
 
 								clauses.push( `${ column_name } ${ serialized_value === null ? 'IS NULL' : `= $${ values.length + 1 }` }` );
-								values.push( serialized_value );
+
+								if ( serialized_value !== null ) {
+									values.push( serialized_value );
+								}
 							}
 						}
 					}
